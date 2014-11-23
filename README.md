@@ -1,5 +1,7 @@
-pyFsdb | python file system database
+pyFsdb
 ======
+python file system database
+-----
 One class solution to expose a simple api (add,get,remove) to menage the saving of files on disk.  
 Files are placed under specified fsdb root folder and are managed using a directory tree generated from the file checksum  
 It is possible to choose how much levels to use in the directory tree.
