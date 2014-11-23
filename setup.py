@@ -16,7 +16,7 @@ setup(
         "Topic :: Database",
         "Operating System :: OS Independent",
         "Programming Language :: Python :: 2.7",
-        "Programming Language :: Python :: 2 :: Only",
+        "Programming Language :: Python :: 2 :: Only"
     ],
 )
 
