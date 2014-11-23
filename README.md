@@ -10,3 +10,5 @@ If you add a file with the following sha1sum to an fsdb instance with a deep lev
 `7bf770901365d4b12ce46a2d545407daf224e583`  
 The file will be placed in  
 `/path_To_Fsdb_Root/7b/f770/901365d4/b12ce46a2d545407daf224e583`
+#####Installation
+`pip install Fsdb`
