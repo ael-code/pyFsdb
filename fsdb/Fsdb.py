@@ -6,6 +6,11 @@ import stat
 import unicodedata
 import hashlib
 import shutil
+import warnings
+
+
+import config
+
 
 class Fsdb(object):
    """File system database
@@ -13,15 +18,21 @@ class Fsdb(object):
       files are placed under specified fsdb root folder and 
       are managed using a directory tree generated from the file checksum
    """
-   def __init__(self, fsdbRoot, mode=0770, deep=3):
-      """Create an fsdb instance
+   
+   CONFIG_FILE = ".fsdb.conf"
+   
+   def __init__(self, fsdbRoot, mode=None, deep=None):
+      """Create an fsdb instance.
+         If file named ".fsdb.conf" it is found in @fsdbRoot, 
+         the file will be parsed, config options will be loded and
+         function parameters will be ignored.
+         If there is not such file, function parameters will be loaded and 
+         written to ".fsdb.conf" in @fsdbRoot
        Args:
          fsdbRoot -- root path under will be placed all files
          mode  -- mask (octal) to use for files/folders creation (default: 0770)
-         deep  -- number of levels to use for directory tree (default: 3)         
+         deep  -- number of' levels to use for directory tree (default: 3)         
       """
-      self.__mode = mode
-      self.__deep = deep
       
       #cleanup the path
       fsdbRoot = os.path.expanduser(fsdbRoot)   # replace ~
@@ -37,9 +48,36 @@ class Fsdb(object):
       if isinstance(fsdbRoot, unicode):
          fsdbRoot = unicodedata.normalize("NFC", fsdbRoot)
       
-      #make all parent directories if they do not exist
-      self._makedirs(fsdbRoot)
+      configPath = os.path.join(fsdbRoot,Fsdb.CONFIG_FILE)
       
+      if Fsdb.configExists(fsdbRoot):
+         ##warn user about config ignoring and load config from file
+         warnings.warn("fsdb config file found. Runtime parameters will be ignored", RuntimeWarning)
+         
+         conf = config.loadConf(configPath)
+         self._mode = conf['mode']
+         self._deep = conf['deep']
+         
+      else:
+         conf = config.getDefaultConf()
+         if mode != None:
+            conf['mode'] = mode
+         if deep != None:
+            conf['deep'] = deep
+         
+         self._mode = conf['mode']
+         self._deep = conf['deep']
+         
+         #make all parent directories if they do not exist
+         self._makedirs(fsdbRoot)
+         
+         #write config file
+         config.writeConf(configPath,conf)
+         oldmask = os.umask(0)
+         os.chmod(configPath,self._mode)
+         os.umask(oldmask)
+         
+         
       #fsdbRoot it is an existing regular folder and we have read and write permission
       self.fsdbRoot = fsdbRoot
       
@@ -64,7 +102,7 @@ class Fsdb(object):
       #copy file and set permission
       oldmask = os.umask(0)
       shutil.copyfile(filePath, absPath)
-      os.chmod(absPath,self.__mode)
+      os.chmod(absPath,self._mode)
       os.umask(oldmask)
       
       return absPath
@@ -104,7 +142,7 @@ class Fsdb(object):
         Returns:
          String rapresenting the absolute path of the file      
       """
-      relPath=Fsdb.generateDirTreePath(checksum,self.__deep)
+      relPath=Fsdb.generateDirTreePath(checksum,self._deep)
       return os.path.join(self.fsdbRoot,relPath)
       
    def _makedirs(self,path):
@@ -115,7 +153,7 @@ class Fsdb(object):
       """
       try:
          oldmask = os.umask(0)
-         os.makedirs(path,self.__mode)
+         os.makedirs(path,self._mode)
          os.umask(oldmask)
       except OSError, e:
          if(e.errno == errno.EACCES):
@@ -129,7 +167,10 @@ class Fsdb(object):
          else:
             raise e
       
-   
+   def __str__(self):
+      return "{root: "+self.fsdbRoot+", mode: "+str(oct(self._mode))+", deep: "+str(self._deep)+"}"
+
+
    @staticmethod
    def fileChecksum(filepath,block_size=2**20):
       """Calculate checksum
@@ -172,3 +213,17 @@ class Fsdb(object):
          index += jump
       path = os.path.join(path,fileChecksum[index:])
       return path
+      
+   @staticmethod
+   def configExists(fsdbRoot):
+      path = os.path.join(fsdbRoot,Fsdb.CONFIG_FILE)
+      try:
+         os.stat(path)
+      except OSError, e:
+         if(e.errno == errno.EACCES):
+            raise Exception("not sufficent permissions to stat fsdb config file: \""+path+'\"')
+         elif(e.errno == errno.ENOENT):
+            return False
+         else:
+            raise e
+      return True
