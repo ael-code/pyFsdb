@@ -88,12 +88,14 @@ class Fsdb(object):
        Args:
          filePath -- path of the file to be add
        Returns:
-         String rapresenting the absolute path of the new file
+         String rapresenting the checksum of the file
       """
       if not os.path.isfile(filePath):
          raise Exception("fsdb can not add: not regular file received")
       
-      absPath=self.getFilePath(Fsdb.fileChecksum(filePath))
+      checksum = Fsdb.fileChecksum(filePath)
+      
+      absPath=self.getFilePath(checksum)
       absFolderPath = os.path.dirname(absPath)
       
       #make all parent directories if they do not exist
@@ -105,7 +107,7 @@ class Fsdb(object):
       os.chmod(absPath,self._mode)
       os.umask(oldmask)
       
-      return absPath
+      return checksum
    
    def remove(self,checksum):
       """Remove an existing file from fsdb.

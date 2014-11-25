@@ -17,8 +17,7 @@ from fsdb import Fsdb
 myFsdb = Fsdb("/tmp/fsdbRoot",mode=0770,deep=4)
 
 #add file
-fileChecksum = Fsdb.fileChecksum("/home/soermejo/uploadTest")
-myFsdb.add("/home/soermejo/uploadTest")
+fileChecksum = myFsdb.add("/path/to/an/existing/file")
 
 #control if file exists
 myFsdb.exists(fileChecksum)
