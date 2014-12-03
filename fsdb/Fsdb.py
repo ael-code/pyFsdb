@@ -16,7 +16,7 @@ class Fsdb(object):
    """File system database
       expose a simple api (add,get,remove) to menage the saving of files on disk.
       files are placed under specified fsdb root folder and 
-      are managed using a directory tree generated from the file checksum
+      are managed using a directory tree generated from the file digest
    """
    
    CONFIG_FILE = ".fsdb.conf"
@@ -86,14 +86,14 @@ class Fsdb(object):
        Args:
          filePath -- path of the file to be add
        Returns:
-         String rapresenting the checksum of the file
+         String rapresenting the digest of the file
       """
       if not os.path.isfile(filePath):
          raise Exception("fsdb can not add: not regular file received")
       
-      checksum = Fsdb.fileChecksum(filePath)
+      digest = Fsdb.fileDigest(filePath)
       
-      absPath=self.getFilePath(checksum)
+      absPath=self.getFilePath(digest)
       absFolderPath = os.path.dirname(absPath)
       
       #make all parent directories if they do not exist
@@ -105,17 +105,17 @@ class Fsdb(object):
       os.chmod(absPath,self._conf['mode'])
       os.umask(oldmask)
       
-      return checksum
+      return digest
    
-   def remove(self,checksum):
+   def remove(self,digest):
       """Remove an existing file from fsdb.
-         File with the given checksum will be removed from fsdb and
+         File with the given digest will be removed from fsdb and
          the directory tree will be cleaned (remove empty folders)
        Args:
-         checksum -- checksum of the file to remove
+         digest -- digest of the file to remove
       """
       #remove file
-      absPath=self.getFilePath(checksum)
+      absPath=self.getFilePath(digest)
       os.remove(absPath)
       
       #clean directory tree
@@ -128,21 +128,21 @@ class Fsdb(object):
          os.rmdir(tmpPath)
          tmpPath=os.path.dirname(tmpPath)
    
-   def exists(self,checksum):
+   def exists(self,digest):
       """Check file existence in fsdb
         Returns:
          True if file exists under this instance of fsdb, false otherwise
       """
-      return os.path.isfile(self.getFilePath(checksum))
+      return os.path.isfile(self.getFilePath(digest))
    
-   def getFilePath(self,checksum):
-      """Retrieve path to the file with the given checksum
+   def getFilePath(self,digest):
+      """Retrieve path to the file with the given digest
         Args:
-         checksum -- checksum of the file
+         digest -- digest of the file
         Returns:
          String rapresenting the absolute path of the file      
       """
-      relPath=Fsdb.generateDirTreePath(checksum,self._conf['deep'])
+      relPath=Fsdb.generateDirTreePath(digest,self._conf['deep'])
       return os.path.join(self.fsdbRoot,relPath)
       
    def _makedirs(self,path):
@@ -172,12 +172,12 @@ class Fsdb(object):
 
 
    @staticmethod
-   def fileChecksum(filepath,block_size=2**20):
-      """Calculate checksum
-         File with the given checksum will be removed from fsdb and
+   def fileDigest(filepath,algorithm="sha1",block_size=2**20):
+      """Calculate digest
+         File with the given digest will be removed from fsdb and
          the directory tree will be cleaned (remove empty folders)
        Args:
-         checksum -- checksum of the file to remove
+         digest -- digest of the file to remove
       """
       hashM = hashlib.sha1()
       with open(filepath, 'r') as f:
@@ -186,32 +186,32 @@ class Fsdb(object):
       return hashM.hexdigest()
    
    @staticmethod
-   def generateDirTreePath(fileChecksum,deep):
-      """Generate a relative path from the given fileCheckSum
+   def generateDirTreePath(fileDigest,deep):
+      """Generate a relative path from the given fileDigest
          relative path has a numbers of directories levels according to @deep
        Args:
-         fileChecksum -- checksum for which the relative path will be generate
+         fileDigest -- digest for which the relative path will be generate
          deep -- number of levels to use in relative path generation
        Returns:
-         relative path for the given checksum
+         relative path for the given digest
       """
       if(deep < 0):
          raise Exception("deep level can not be negative")
-      if( os.path.split(fileChecksum)[1] != fileChecksum):
-         raise Exception("fileCheckSum cannot contain path separator")
+      if( os.path.split(fileDigest)[1] != fileDigest):
+         raise Exception("fileDigest cannot contain path separator")
       
       #calculate min length for the given deep (2^1+2^2+...+2^deep+ 1)
       min = (2**(deep+1))-1
-      if( len(fileChecksum) < min):
-         raise Exception("fileChecksum too short for the given deep")
+      if( len(fileDigest) < min):
+         raise Exception("fileDigest too short for the given deep")
          
       path=""
       index=0
       for p in range(1,deep+1):
          jump = 2**p
-         path = os.path.join(path,fileChecksum[index:index+jump])
+         path = os.path.join(path,fileDigest[index:index+jump])
          index += jump
-      path = os.path.join(path,fileChecksum[index:])
+      path = os.path.join(path,fileDigest[index:])
       return path
       
    @staticmethod

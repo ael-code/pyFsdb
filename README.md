@@ -3,7 +3,7 @@ pyFsdb
 python file system database
 -----
 One class solution to expose a simple api (add,get,remove) to menage the saving of files on disk.  
-Files are placed under specified fsdb root folder and are managed using a directory tree generated from the file checksum
+Files are placed under specified fsdb root folder and are managed using a directory tree generated from the file digest
 
 #####Installation
 Fsdb it's available on PyPI so you can easily install through pip  
@@ -17,16 +17,16 @@ from fsdb import Fsdb
 myFsdb = Fsdb("/tmp/fsdbRoot",mode=0770,deep=4)
 
 #add file
-fileChecksum = myFsdb.add("/path/to/an/existing/file")
+fileDigest = myFsdb.add("/path/to/an/existing/file")
 
 #control if file exists
-myFsdb.exists(fileChecksum)
+myFsdb.exists(fileDigest)
 
 #get file path
-myFsdb.getFilePath(fileChecksum)
+myFsdb.getFilePath(fileDigest)
 
 #remove file
-myFsdb.remove(fileChecksum)
+myFsdb.remove(fileDigest)
 ```
 
 #####Path example
