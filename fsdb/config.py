@@ -33,11 +33,13 @@ def writeConf(configPath, conf):
    if not isinstance(conf,dict):
       raise TypeError(TAG+": bad format for config file, not a `dict`");
    
-   if 'mode' in conf:
-      conf['mode'] = str(oct(conf['mode']))
+   mConf = conf.copy()
+   
+   if 'mode' in mConf:
+      mConf['mode'] = str(oct(mConf['mode']))
       
    with open(configPath, 'w') as outfile:
-      json.dump(conf, outfile, indent = 4)
+      json.dump(mConf, outfile, indent = 4)
 
 def getDefaultConf():
    return {'mode':DEFAULT_MODE,'deep':DEFAULT_DEEP}

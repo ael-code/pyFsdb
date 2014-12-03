@@ -55,8 +55,7 @@ class Fsdb(object):
          warnings.warn("fsdb config file found. Runtime parameters will be ignored", RuntimeWarning)
          
          conf = config.loadConf(configPath)
-         self._mode = conf['mode']
-         self._deep = conf['deep']
+         self._conf = conf
          
       else:
          conf = config.getDefaultConf()
@@ -65,8 +64,7 @@ class Fsdb(object):
          if deep != None:
             conf['deep'] = deep
          
-         self._mode = conf['mode']
-         self._deep = conf['deep']
+         self._conf = conf
          
          #make all parent directories if they do not exist
          self._makedirs(fsdbRoot)
@@ -74,7 +72,7 @@ class Fsdb(object):
          #write config file
          config.writeConf(configPath,conf)
          oldmask = os.umask(0)
-         os.chmod(configPath,self._mode)
+         os.chmod(configPath,self._conf['mode'])
          os.umask(oldmask)
          
          
@@ -104,7 +102,7 @@ class Fsdb(object):
       #copy file and set permission
       oldmask = os.umask(0)
       shutil.copyfile(filePath, absPath)
-      os.chmod(absPath,self._mode)
+      os.chmod(absPath,self._conf['mode'])
       os.umask(oldmask)
       
       return checksum
@@ -144,7 +142,7 @@ class Fsdb(object):
         Returns:
          String rapresenting the absolute path of the file      
       """
-      relPath=Fsdb.generateDirTreePath(checksum,self._deep)
+      relPath=Fsdb.generateDirTreePath(checksum,self._conf['deep'])
       return os.path.join(self.fsdbRoot,relPath)
       
    def _makedirs(self,path):
@@ -155,7 +153,7 @@ class Fsdb(object):
       """
       try:
          oldmask = os.umask(0)
-         os.makedirs(path,self._mode)
+         os.makedirs(path,self._conf['mode'])
          os.umask(oldmask)
       except OSError, e:
          if(e.errno == errno.EACCES):
@@ -170,7 +168,7 @@ class Fsdb(object):
             raise e
       
    def __str__(self):
-      return "{root: "+self.fsdbRoot+", mode: "+str(oct(self._mode))+", deep: "+str(self._deep)+"}"
+      return "{root: "+self.fsdbRoot+", mode: "+str(oct(self._conf['mode']))+", deep: "+str(self._conf['deep'])+"}"
 
 
    @staticmethod
