@@ -10,13 +10,14 @@ setup(
     description = ("File system database. Easily manage file storing"),
     keywords = "database file storing db",
     url = "https://github.com/ael-code/pyFsdb",
+    license = "LGPLv3",
     classifiers=[
         "Development Status :: 3 - Alpha",
-        "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+        "License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)",
         "Topic :: Database",
         "Operating System :: OS Independent",
         "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: 2 :: Only"
-    ],
+    ]
 )
 
