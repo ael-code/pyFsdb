@@ -21,7 +21,7 @@ class Fsdb(object):
    
    CONFIG_FILE = ".fsdb.conf"
    
-   def __init__(self, fsdbRoot, mode=None, deep=None):
+   def __init__(self, fsdbRoot, mode=None, deep=None, hash_alg=None):
       """Create an fsdb instance.
          If file named ".fsdb.conf" it is found in @fsdbRoot, 
          the file will be parsed, config options will be loded and
@@ -30,8 +30,9 @@ class Fsdb(object):
          written to ".fsdb.conf" in @fsdbRoot
        Args:
          fsdbRoot -- root path under will be placed all files
-         mode  -- mask (octal) to use for files/folders creation (default: 0770)
-         deep  -- number of' levels to use for directory tree (default: 3)         
+         mode  -- string reppresenting the mask (octal) to use for files/folders creation (default: "0770")
+         deep  -- number of levels to use for directory tree (default: 3)
+         hash_alg -- string name of the hash algorithm to use (default: "sha1") 
       """
       
       #cleanup the path
@@ -58,11 +59,16 @@ class Fsdb(object):
          self._conf = conf
          
       else:
-         conf = config.getDefaultConf()
+         conf = dict()
+         
          if mode != None:
             conf['mode'] = mode
          if deep != None:
             conf['deep'] = deep
+         if hash_alg != None:
+            conf['hash_alg'] = hash_alg
+         
+         conf = config.normalizeConf(conf)
          
          self._conf = conf
          
@@ -91,7 +97,7 @@ class Fsdb(object):
       if not os.path.isfile(filePath):
          raise Exception("fsdb can not add: not regular file received")
       
-      digest = Fsdb.fileDigest(filePath)
+      digest = Fsdb.fileDigest(filePath,algorithm=self._conf['hash_alg'])
       
       absPath=self.getFilePath(digest)
       absFolderPath = os.path.dirname(absPath)
@@ -179,7 +185,22 @@ class Fsdb(object):
        Args:
          digest -- digest of the file to remove
       """
-      hashM = hashlib.sha1()
+      if(algorithm == "md5"):
+        algFunct = hashlib.md5
+      elif(algorithm == "sha1" or algorithm == "sha"):
+        algFunct = hashlib.sha1
+      elif(algorithm == "sha224"):
+        algFunct = hashlib.sha224
+      elif(algorithm == "sha256"):
+        algFunct = hashlib.sha256
+      elif(algorithm == "sha384"):
+        algFunct = hashlib.sha384
+      elif(algorithm == "sha512" or algorithm == "sha2"):
+        algFunct = hashlib.sha512
+      else:
+        raise ValueError('"'+ algorithm + '" it is not a supported algorithm function')
+      
+      hashM = algFunct()
       with open(filepath, 'r') as f:
          data = f.read(block_size)
          hashM.update(data)
