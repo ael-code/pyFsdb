@@ -2,6 +2,9 @@ pyFsdb
 ======
 python file system database
 -----
+[![License](https://pypip.in/license/Fsdb/badge.svg)](https://pypi.python.org/pypi/Fsdb/)
+[![Latest Version](https://pypip.in/version/Fsdb/badge.svg)](https://pypi.python.org/pypi/Fsdb/)
+
 One class solution to expose a simple api (add,get,remove) to menage the saving of files on disk.  
 Files are placed under specified fsdb root folder and are managed using a directory tree generated from the file digest
 
