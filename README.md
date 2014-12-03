@@ -14,7 +14,7 @@ Fsdb it's available on PyPI so you can easily install through pip
 from fsdb import Fsdb
 
 #create new fsdb instance
-myFsdb = Fsdb("/tmp/fsdbRoot",mode=0770,deep=4)
+myFsdb = Fsdb("/tmp/fsdbRoot")
 
 #add file
 fileDigest = myFsdb.add("/path/to/an/existing/file")
@@ -34,3 +34,16 @@ If you add a file with the following sha1sum to an fsdb instance with a configur
 `7bf770901365d4b12ce46a2d545407daf224e583`  
 The file will be placed in  
 `/path_To_Fsdb_Root/7b/f770/901365d4/b12ce46a2d545407daf224e583`
+
+#####Configuration
+There are two ways to configure fsbd:
+ - passing arguments to class constructor
+ - editing the json config file
+ 
+The config file must be in the fsdb root folder with name ```.fsdb.conf``` and must be written in a valid json syntax
+
+| config name | type | default value | description |
+|-------------|------|---------------|-------------|
+|mode | string | "0770" | permissions mask to use in file/folder creation |
+|deep | int | 3 | number of levels to use for directory tree |
+|hash_alg | string | "sha1" | name of the hash algorithm to use for file digest|
