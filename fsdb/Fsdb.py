@@ -6,7 +6,7 @@ import stat
 import unicodedata
 import hashlib
 import shutil
-import warnings
+import logging
 
 import config
 
@@ -21,7 +21,7 @@ class Fsdb(object):
 
     CONFIG_FILE = ".fsdb.conf"
 
-    def __init__(self, fsdbRoot, mode=None, deep=None, hash_alg=None):
+    def __init__(self, fsdbRoot, mode=None, deep=None, hash_alg=None, logHandler=None):
         """Create an fsdb instance.
            If file named ".fsdb.conf" it is found in @fsdbRoot,
            the file will be parsed, config options will be loded and
@@ -34,7 +34,15 @@ class Fsdb(object):
                      to use for files/folders creation (default: "0770")
             deep  -- number of levels to use for directory tree (default: 3)
             hash_alg -- string name of the hash algorithm to use (default: "sha1")q
+            logHandler -- handler that will be used to log message
         """
+
+        if logHandler:
+            self.logger = logging.getLogger(__name__)
+            self.logger.setLevel(logging.DEBUG)
+            self.logger.addHandler(logHandler)
+        else:
+            self.logger = None
 
         # cleanup the path
         fsdbRoot = os.path.expanduser(fsdbRoot)    # replace ~
@@ -54,7 +62,8 @@ class Fsdb(object):
 
         if Fsdb.configExists(fsdbRoot):
             # warn user about config ignoring and load config from file
-            warnings.warn("fsdb config file found. Runtime parameters will be ignored", RuntimeWarning)
+            if self.logger:
+                self.logger.warn("fsdb config file found. Runtime parameters will be ignored")
 
             conf = config.loadConf(configPath)
             self._conf = conf
@@ -85,6 +94,9 @@ class Fsdb(object):
         # fsdbRoot it is an existing regular folder and we have read and write permission
         self.fsdbRoot = fsdbRoot
 
+        if self.logger:
+            self.logger.debug("Fsdb initialized successfully: "+self.__str__())
+
     def add(self, filePath):
         """Add an existing file to fsdb.
             File under @filePath will be copied under fsdb directory tree
@@ -110,6 +122,9 @@ class Fsdb(object):
         os.chmod(absPath, self._conf['mode'])
         os.umask(oldmask)
 
+        if self.logger:
+            self.logger.debug('Added file: "'+filePath+'" -> "'+absPath+'" [ '+digest+' ]')
+
         return digest
 
     def remove(self, digest):
@@ -127,11 +142,14 @@ class Fsdb(object):
         tmpPath = os.path.dirname(absPath)
         while tmpPath != self.fsdbRoot:
             if os.path.islink(tmpPath):
-                raise Exception("fsdb found a link in db tree: \""+tmpPath+'\"')
+                raise Exception('fsdb found a link in db tree: "'+tmpPath+'"')
             if len(os.listdir(tmpPath)) > 0:
                 break
             os.rmdir(tmpPath)
             tmpPath = os.path.dirname(tmpPath)
+
+        if self.logger:
+            self.logger.debug('Removed file: "'+absPath+'" [ '+digest+' ]')
 
     def exists(self, digest):
         """Check file existence in fsdb
@@ -173,7 +191,7 @@ class Fsdb(object):
                 raise e
 
     def __str__(self):
-        return "{root: "+self.fsdbRoot+", mode: "+str(oct(self._conf['mode']))+", deep: "+str(self._conf['deep'])+"}"
+        return "{root: "+self.fsdbRoot+", mode: "+str(oct(self._conf['mode']))+", deep: "+str(self._conf['deep'])+", hash_alg: "+self._conf['hash_alg']+"}"
 
     @staticmethod
     def fileDigest(filepath, algorithm="sha1", block_size=2**20):
