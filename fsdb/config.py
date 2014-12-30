@@ -20,8 +20,8 @@ def normalizeConf(oldConf):
         conf['mode'] = DEFAULT_MODE
     elif not isinstance(conf['mode'], basestring):
         raise TypeError(TAG+": `mode` must be a string")
-    else:
-        conf['mode'] = int(conf['mode'], 8)
+
+    conf['mode'] = int(conf['mode'], 8)
 
     if 'deep' not in conf:
         conf['deep'] = DEFAULT_DEEP
