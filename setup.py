@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name = "Fsdb",
-    version = "0.2.3",
+    version = "0.2.4",
     packages=['fsdb'],
 
     author = "Ael",
