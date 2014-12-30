@@ -21,7 +21,7 @@ class Fsdb(object):
 
     CONFIG_FILE = ".fsdb.conf"
 
-    def __init__(self, fsdbRoot, mode=None, deep=None, hash_alg=None, logHandler=None):
+    def __init__(self, fsdbRoot, mode=None, deep=None, hash_alg=None):
         """Create an fsdb instance.
            If file named ".fsdb.conf" it is found in @fsdbRoot,
            the file will be parsed, config options will be loded and
@@ -37,12 +37,7 @@ class Fsdb(object):
             logHandler -- handler that will be used to log message
         """
 
-        if logHandler:
-            self.logger = logging.getLogger(__name__)
-            self.logger.setLevel(logging.DEBUG)
-            self.logger.addHandler(logHandler)
-        else:
-            self.logger = None
+        self.logger = logging.getLogger(__name__)
 
         # cleanup the path
         fsdbRoot = os.path.expanduser(fsdbRoot)    # replace ~
@@ -62,8 +57,7 @@ class Fsdb(object):
 
         if Fsdb.configExists(fsdbRoot):
             # warn user about config ignoring and load config from file
-            if self.logger:
-                self.logger.warn("fsdb config file found. Runtime parameters will be ignored")
+            self.logger.warn("fsdb config file found. Runtime parameters will be ignored")
 
             conf = config.loadConf(configPath)
             self._conf = conf
@@ -94,8 +88,7 @@ class Fsdb(object):
         # fsdbRoot it is an existing regular folder and we have read and write permission
         self.fsdbRoot = fsdbRoot
 
-        if self.logger:
-            self.logger.debug("Fsdb initialized successfully: "+self.__str__())
+        self.logger.debug("Fsdb initialized successfully: "+self.__str__())
 
     def add(self, filePath):
         """Add an existing file to fsdb.
@@ -122,8 +115,7 @@ class Fsdb(object):
         os.chmod(absPath, self._conf['mode'])
         os.umask(oldmask)
 
-        if self.logger:
-            self.logger.debug('Added file: "'+filePath+'" -> "'+absPath+'" [ '+digest+' ]')
+        self.logger.debug('Added file: "'+filePath+'" -> "'+absPath+'" [ '+digest+' ]')
 
         return digest
 
@@ -148,8 +140,7 @@ class Fsdb(object):
             os.rmdir(tmpPath)
             tmpPath = os.path.dirname(tmpPath)
 
-        if self.logger:
-            self.logger.debug('Removed file: "'+absPath+'" [ '+digest+' ]')
+        self.logger.debug('Removed file: "'+absPath+'" [ '+digest+' ]')
 
     def exists(self, digest):
         """Check file existence in fsdb
