@@ -57,7 +57,7 @@ class Fsdb(object):
 
         if Fsdb.configExists(fsdbRoot):
             # warn user about config ignoring and load config from file
-            self.logger.warn("fsdb config file found. Runtime parameters will be ignored")
+            self.logger.debug("Fsdb config file found. Runtime parameters will be ignored. ["+configPath+"]")
 
             conf = config.loadConf(configPath)
             self._conf = conf
@@ -102,6 +102,10 @@ class Fsdb(object):
             raise Exception("fsdb can not add: not regular file received")
 
         digest = Fsdb.fileDigest(filePath, algorithm=self._conf['hash_alg'])
+
+        if self.exists(digest):
+            self.logger.debug('Added File: ['+digest+'] ( Already exists. Skipping transfer)')
+            return digest
 
         absPath = self.getFilePath(digest)
         absFolderPath = os.path.dirname(absPath)
