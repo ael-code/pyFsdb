@@ -2,14 +2,14 @@ pyFsdb
 ======
 python file system database
 -----
-[![License](https://pypip.in/license/Fsdb/badge.svg)](https://pypi.python.org/pypi/Fsdb/)
-[![Latest Version](https://pypip.in/version/Fsdb/badge.svg)](https://pypi.python.org/pypi/Fsdb/)
+[![License](https://pypip.in/license/Fsdb/badge.svg?style=flat)](https://pypi.python.org/pypi/Fsdb/)
+[![Latest Version](https://pypip.in/version/Fsdb/badge.svg?style=flat)](https://pypi.python.org/pypi/Fsdb/)
 
 One class solution to expose a simple api (add,get,remove) to menage the saving of files on disk.  
 Files are placed under specified fsdb root folder and are managed using a directory tree generated from the file digest
 
 #####Installation
-Fsdb it's available on PyPI so you can easily install through pip  
+Fsdb is available on PyPI so you can easily install through pip  
 `pip install Fsdb`
 
 #####Usage
