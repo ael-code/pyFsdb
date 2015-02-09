@@ -2,3 +2,4 @@
 build/*
 dist/*
 Fsdb.egg-info/*
+docs/build/*

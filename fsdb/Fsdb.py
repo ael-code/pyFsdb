@@ -33,8 +33,7 @@ class Fsdb(object):
             mode  -- string reppresenting the mask (octal)
                      to use for files/folders creation (default: "0770")
             deep  -- number of levels to use for directory tree (default: 3)
-            hash_alg -- string name of the hash algorithm to use (default: "sha1")q
-            logHandler -- handler that will be used to log message
+            hash_alg -- string name of the hash algorithm to use (default: "sha1")
         """
 
         self.logger = logging.getLogger(__name__)
