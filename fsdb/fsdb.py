@@ -100,7 +100,7 @@ class Fsdb(object):
         if not os.path.isfile(filePath):
             raise Exception("fsdb can not add: not regular file received")
 
-        digest = Fsdb.fileDigest(filePath, algorithm=self._conf['hash_alg'])
+        digest = Fsdb.file_digest(filePath, algorithm=self._conf['hash_alg'])
 
         if self.exists(digest):
             self.logger.debug('Added File: ['+digest+'] ( Already exists. Skipping transfer)')
@@ -188,7 +188,7 @@ class Fsdb(object):
         return "{root: "+self.fsdbRoot+", mode: "+str(oct(self._conf['mode']))+", deep: "+str(self._conf['deep'])+", hash_alg: "+self._conf['hash_alg']+"}"
 
     @staticmethod
-    def fileDigest(filepath, algorithm="sha1", block_size=2**20):
+    def file_digest(filepath, algorithm="sha1", block_size=2**20):
         """Calculate digest
             File with the given digest will be removed from fsdb and
             the directory tree will be cleaned (remove empty folders)
