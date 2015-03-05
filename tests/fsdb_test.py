@@ -67,7 +67,20 @@ class FsdbTest(unittest.TestCase):
     def test_remove_not_existing_file(self):
         with self.assertRaisesRegexp(OSError,"No such file or directory"):
             self.fsdb.remove(randomID(20))
-        
+
+    def test_check(self):
+        testFilePath = self.createTestFile()
+        digest = self.fsdb.add(testFilePath)
+        self.assertTrue(self.fsdb.check(digest))
+
+    def test_check_fail(self):
+        testFilePath = self.createTestFile()
+        digest = self.fsdb.add(testFilePath)
+        storedFilePath = self.fsdb.get_file_path(digest)
+        with open(storedFilePath, 'w+') as f:
+            f.write("more is less, less is more")
+        self.assertFalse(self.fsdb.check(digest))
+
     def tearDown(self):
         shutil.rmtree(self.FSDB_TMP_PATH)
 

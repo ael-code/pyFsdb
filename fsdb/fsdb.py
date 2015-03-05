@@ -184,14 +184,24 @@ class Fsdb(object):
             else:
                 raise e
 
+    def check(self, digest):
+        """Check the integrity of the file with the given digest
+          Args:
+            digest -- digest of the file to check
+          Returns:
+            True if the file is not corrupted
+        """
+        return self._calc_digest(self.get_file_path(digest)) == digest
+
+    def _calc_digest(self, path):
+        return Fsdb.file_digest(path, algorithm=self._conf['hash_alg'])
+
     def __str__(self):
         return "{root: "+self.fsdbRoot+", mode: "+str(oct(self._conf['mode']))+", deep: "+str(self._conf['deep'])+", hash_alg: "+self._conf['hash_alg']+"}"
 
     @staticmethod
     def file_digest(filepath, algorithm="sha1", block_size=2**20):
-        """Calculate digest
-            File with the given digest will be removed from fsdb and
-            the directory tree will be cleaned (remove empty folders)
+        """Calculate digest of the file located at @filepath
          Args:
             digest -- digest of the file to remove
         """
