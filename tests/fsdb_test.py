@@ -50,13 +50,13 @@ class FsdbTest(unittest.TestCase):
     def test_get_file_path(self):
         testFilePath = self.createTestFile()
         digest = self.fsdb.add(testFilePath)
-        self.assertIsInstance(self.fsdb.getFilePath(digest),basestring)
-        self.assertTrue(os.path.isabs(self.fsdb.getFilePath(digest)))
+        self.assertIsInstance(self.fsdb.get_file_path(digest),basestring)
+        self.assertTrue(os.path.isabs(self.fsdb.get_file_path(digest)))
 
     def test_same_file_after_retrieval(self):
         testFilePath = self.createTestFile()
         digest = self.fsdb.add(testFilePath)
-        storedFilePath = self.fsdb.getFilePath(digest)
+        storedFilePath = self.fsdb.get_file_path(digest)
         self.assertTrue( filecmp.cmp(testFilePath, storedFilePath, shallow=False) )
         
     def test_remove_existing_file(self):

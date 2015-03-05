@@ -33,7 +33,7 @@ Usage
     myFsdb.exists(fileDigest)
 
     #get file path
-    myFsdb.getFilePath(fileDigest)
+    myFsdb.get_file_path(fileDigest)
 
     #remove file
     myFsdb.remove(fileDigest)

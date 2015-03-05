@@ -106,7 +106,7 @@ class Fsdb(object):
             self.logger.debug('Added File: ['+digest+'] ( Already exists. Skipping transfer)')
             return digest
 
-        absPath = self.getFilePath(digest)
+        absPath = self.get_file_path(digest)
         absFolderPath = os.path.dirname(absPath)
 
         # make all parent directories if they do not exist
@@ -130,7 +130,7 @@ class Fsdb(object):
             digest -- digest of the file to remove
         """
         # remove file
-        absPath = self.getFilePath(digest)
+        absPath = self.get_file_path(digest)
         os.remove(absPath)
 
         # clean directory tree
@@ -150,10 +150,10 @@ class Fsdb(object):
           Returns:
             True if file exists under this instance of fsdb, false otherwise
         """
-        return os.path.isfile(self.getFilePath(digest))
+        return os.path.isfile(self.get_file_path(digest))
 
-    def getFilePath(self, digest):
-        """Retrieve path to the file with the given digest
+    def get_file_path(self, digest):
+        """Retrieve the absolute path to the file with the given digest
           Args:
             digest -- digest of the file
           Returns:
