@@ -54,7 +54,7 @@ class Fsdb(object):
 
         configPath = os.path.join(fsdbRoot, Fsdb.CONFIG_FILE)
 
-        if Fsdb.configExists(fsdbRoot):
+        if Fsdb.config_exists(fsdbRoot):
             # warn user about config ignoring and load config from file
             self.logger.debug("Fsdb config file found. Runtime parameters will be ignored. ["+configPath+"]")
 
@@ -159,7 +159,7 @@ class Fsdb(object):
           Returns:
             String rapresenting the absolute path of the file
         """
-        relPath = Fsdb.generateDirTreePath(digest, self._conf['deep'])
+        relPath = Fsdb.generate_tree_path(digest, self._conf['deep'])
         return os.path.join(self.fsdbRoot, relPath)
 
     def _makedirs(self, path):
@@ -217,7 +217,7 @@ class Fsdb(object):
         return hashM.hexdigest()
 
     @staticmethod
-    def generateDirTreePath(fileDigest, deep):
+    def generate_tree_path(fileDigest, deep):
         """Generate a relative path from the given fileDigest
             relative path has a numbers of directories levels according to @deep
          Args:
@@ -246,7 +246,7 @@ class Fsdb(object):
         return path
 
     @staticmethod
-    def configExists(fsdbRoot):
+    def config_exists(fsdbRoot):
         path = os.path.join(fsdbRoot, Fsdb.CONFIG_FILE)
         try:
             os.stat(path)
