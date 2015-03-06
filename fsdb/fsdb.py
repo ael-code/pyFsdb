@@ -89,6 +89,32 @@ class Fsdb(object):
 
         self.logger.debug("Fsdb initialized successfully: "+self.__str__())
 
+    def _calc_digest(self, path):
+        """calculate digest of the file at the given path"""
+        return Fsdb.file_digest(path, algorithm=self._conf['hash_alg'])
+
+    def _makedirs(self, path):
+        """Make folders recursively for the given path and
+            check read and write permission on the path
+          Args:
+            path -- path to the leaf folder
+        """
+        try:
+            oldmask = os.umask(0)
+            os.makedirs(path, self._conf['mode'])
+            os.umask(oldmask)
+        except OSError, e:
+            if(e.errno == errno.EACCES):
+                raise Exception("not sufficent permissions to write on fsdb folder: \""+path+'\"')
+            elif(e.errno == errno.EEXIST):
+                fstat = os.stat(path)
+                if not stat.S_ISDIR(fstat.st_mode):
+                    raise Exception("fsdb folder already exists but it is not a regular folder: \""+path+'\"')
+                elif not os.access(path, os.R_OK and os.W_OK):
+                    raise Exception("not sufficent permissions to write on fsdb folder: \""+path+'\"')
+            else:
+                raise e
+
     def add(self, filePath):
         """Add an existing file to fsdb.
             File under @filePath will be copied under fsdb directory tree
@@ -162,28 +188,6 @@ class Fsdb(object):
         relPath = Fsdb.generate_tree_path(digest, self._conf['deep'])
         return os.path.join(self.fsdbRoot, relPath)
 
-    def _makedirs(self, path):
-        """Make folders recursively for the given path and
-            check read and write permission on the path
-          Args:
-            path -- path to the leaf folder
-        """
-        try:
-            oldmask = os.umask(0)
-            os.makedirs(path, self._conf['mode'])
-            os.umask(oldmask)
-        except OSError, e:
-            if(e.errno == errno.EACCES):
-                raise Exception("not sufficent permissions to write on fsdb folder: \""+path+'\"')
-            elif(e.errno == errno.EEXIST):
-                fstat = os.stat(path)
-                if not stat.S_ISDIR(fstat.st_mode):
-                    raise Exception("fsdb folder already exists but it is not a regular folder: \""+path+'\"')
-                elif not os.access(path, os.R_OK and os.W_OK):
-                    raise Exception("not sufficent permissions to write on fsdb folder: \""+path+'\"')
-            else:
-                raise e
-
     def check(self, digest):
         """Check the integrity of the file with the given digest
           Args:
@@ -212,10 +216,6 @@ class Fsdb(object):
                 continue
             for f in filenames:
                 yield string.replace(rel_dirpath+f, os.sep, "")
-
-    def _calc_digest(self, path):
-        """calculate digest of the file at the given path"""
-        return Fsdb.file_digest(path, algorithm=self._conf['hash_alg'])
 
     def __str__(self):
         return "{root: " + self.fsdbRoot + \
