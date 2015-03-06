@@ -105,6 +105,14 @@ class FsdbTestFunction(unittest.TestCase):
             self.fsdb.add(self.createTestFile())
         self.assertFalse([d for d in self.fsdb.corrupted()])
 
+    def test_len(self):
+        num = 5
+        for _ in range(num):
+            self.fsdb.add(self.createTestFile())
+        self.assertEqual(len(self.fsdb), num)
+    
+    def test_len_empty(self):
+        self.assertEqual(len(self.fsdb), 0)
 
 class FsdbTestConfig(unittest.TestCase):
 

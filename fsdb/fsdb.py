@@ -224,6 +224,13 @@ class Fsdb(object):
                ", hash_alg: " + self._conf['hash_alg'] + \
                "}"
 
+    def __len__(self):
+        """ return the number of stored files"""
+        count = 0
+        for _ in self:
+            count += 1
+        return count
+
     @staticmethod
     def file_digest(filepath, algorithm="sha1", block_size=2**20):
         """Calculate digest of the file located at @filepath
