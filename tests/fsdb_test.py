@@ -81,6 +81,40 @@ class FsdbTest(unittest.TestCase):
             f.write("more is less, less is more")
         self.assertFalse(self.fsdb.check(digest))
 
+    def test_get_all(self):
+        num = 10
+        digests = list()
+        for d in range(0,num):
+            digests.append(self.fsdb.add(self.createTestFile()))
+        inserted = [ i for i in self.fsdb ]
+        # check that the two list contain exactly the same elements ( order does not metter )
+        self.assertTrue(len(set(digests).intersection(inserted)) == num)
+
+    def test_get_all_empty(self):
+        inserted = [ i for i in self.fsdb ]
+        # check that the two list contain exactly the same elements ( order does not metter )
+        self.assertFalse(inserted)
+
+    def test_corrupted(self):
+        num_corr = 3
+        num_ok = 7
+        corr = list()
+        for i in range(0,num_ok):
+            self.fsdb.add(self.createTestFile())
+        for i in range(0, num_corr):
+            digest = self.fsdb.add(self.createTestFile())
+            corr.append(digest)
+            with open(self.fsdb.get_file_path(digest), "w") as f:
+                f.write("more is less, less is more "+str(i))
+        corrupted = [ d for d in self.fsdb.corrupted() ]
+        self.assertTrue(len(set(corr).intersection(corrupted)) == num_corr)
+
+    def test_corrupted_empty(self):
+        num = 4
+        for i in range(0,num):
+            self.fsdb.add(self.createTestFile())
+        self.assertFalse([d for d in self.fsdb.corrupted()])
+
     def tearDown(self):
         shutil.rmtree(self.FSDB_TMP_PATH)
 

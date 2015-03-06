@@ -7,7 +7,7 @@ import unicodedata
 import hashlib
 import shutil
 import logging
-
+import string
 import config
 
 
@@ -193,11 +193,36 @@ class Fsdb(object):
         """
         return self._calc_digest(self.get_file_path(digest)) == digest
 
+    def corrupted(self):
+        """Iterate over digests of all corrupted stored files"""
+        for digest in self:
+            if not self.check(digest):
+                yield digest
+
+    def __iter__(self):
+        """Iterate over digests of all stored files
+
+        Fsdb does not use auxiliary data structure, so this function
+        will search the underlying filesystem for all the file at the expected depth.
+        """
+        for dirpath, dirnames, filenames in os.walk(self.fsdbRoot):
+            rel_dirpath = os.path.relpath(dirpath,self.fsdbRoot)
+            # rel_dirpath does not have os.sep neither on front nor at the end. Ex uno/due/tre
+            if (string.count(rel_dirpath, os.sep) + 1 ) != self._conf['deep']:
+                continue
+            for f in filenames:
+                yield string.replace(rel_dirpath+f, os.sep, "")
+
     def _calc_digest(self, path):
+        """calculate digest of the file at the given path"""
         return Fsdb.file_digest(path, algorithm=self._conf['hash_alg'])
 
     def __str__(self):
-        return "{root: "+self.fsdbRoot+", mode: "+str(oct(self._conf['mode']))+", deep: "+str(self._conf['deep'])+", hash_alg: "+self._conf['hash_alg']+"}"
+        return "{root: " + self.fsdbRoot + \
+               ", mode: " + str(oct(self._conf['mode'])) + \
+               ", deep: " + str(self._conf['deep']) + \
+               ", hash_alg: " + self._conf['hash_alg'] + \
+               "}"
 
     @staticmethod
     def file_digest(filepath, algorithm="sha1", block_size=2**20):
