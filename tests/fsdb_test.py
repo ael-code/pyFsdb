@@ -7,34 +7,25 @@ import random
 import shutil
 import filecmp
 import string
+import tempfile
 from fsdb import Fsdb
 
-class FsdbTest(unittest.TestCase):
+class FsdbTestFunction(unittest.TestCase):
     
     def setUp(self):
-        self.FSDB_TMP_PATH="/tmp/fsdb"
-        self.fsdb = Fsdb(self.FSDB_TMP_PATH+"/fsdbRoot")
+        self.fsdb_tmp_path = tempfile.mkdtemp(prefix="fsdb_test")
+        self.fsdb = Fsdb(os.path.join(self.fsdb_tmp_path, "fsdbRoot"))
     
+    def tearDown(self):
+        shutil.rmtree(self.fsdb_tmp_path)
+
     def createTestFile(self):
-        testFilePath = os.path.join(self.FSDB_TMP_PATH,
-                                    "testFile_"+randomID(4))
-        with open(testFilePath, 'w') as f:
-            f.write("test"+randomID(7))
-        
-        return testFilePath
-
-    def test_creation_without_params(self):
-        fsdbRootPath = os.path.join(self.FSDB_TMP_PATH, 
-                                    "fsdbRoot_"+randomID(4))
-        fsdb = Fsdb(fsdbRootPath)
-
-    def test_creation_with_params(self):
-        fsdbRootPath = os.path.join(self.FSDB_TMP_PATH,
-                                    "fsdbRoot_"+randomID(4))
-        fsdb = Fsdb(fsdbRootPath,
-                    mode="0770",
-                    deep=5,
-                    hash_alg="sha1")
+        fd, fpath = tempfile.mkstemp(prefix='test_file',
+                                    dir=self.fsdb_tmp_path)
+        f = os.fdopen(fd, 'w')
+        f.write("test"+randomID(7))
+        f.close()
+        return fpath
 
     def test_add(self):
         self.fsdb.add(self.createTestFile())
@@ -92,16 +83,15 @@ class FsdbTest(unittest.TestCase):
 
     def test_get_all_empty(self):
         inserted = [ i for i in self.fsdb ]
-        # check that the two list contain exactly the same elements ( order does not metter )
         self.assertFalse(inserted)
 
     def test_corrupted(self):
         num_corr = 3
         num_ok = 7
         corr = list()
-        for i in range(0,num_ok):
+        for _ in range(num_ok):
             self.fsdb.add(self.createTestFile())
-        for i in range(0, num_corr):
+        for i in range(num_corr):
             digest = self.fsdb.add(self.createTestFile())
             corr.append(digest)
             with open(self.fsdb.get_file_path(digest), "w") as f:
@@ -111,12 +101,27 @@ class FsdbTest(unittest.TestCase):
 
     def test_corrupted_empty(self):
         num = 4
-        for i in range(0,num):
+        for _ in range(num):
             self.fsdb.add(self.createTestFile())
         self.assertFalse([d for d in self.fsdb.corrupted()])
 
+
+class FsdbTestConfig(unittest.TestCase):
+
+    def setUp(self):
+        self.fsdb_tmp_path = tempfile.mkdtemp(prefix="fsdb_test")
+
     def tearDown(self):
-        shutil.rmtree(self.FSDB_TMP_PATH)
+        shutil.rmtree(self.fsdb_tmp_path)
+
+    def test_creation_without_params(self):
+        fsdb = Fsdb(self.fsdb_tmp_path)
+
+    def test_creation_with_params(self):
+        fsdb = Fsdb(self.fsdb_tmp_path,
+                    mode="0770",
+                    deep=5,
+                    hash_alg="sha1")
 
 
 def randomID(length):
