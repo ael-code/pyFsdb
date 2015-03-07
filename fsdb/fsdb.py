@@ -231,6 +231,9 @@ class Fsdb(object):
             count += 1
         return count
 
+    def __contains__(self, digest):
+        return self.exists(digest)
+
     @staticmethod
     def file_digest(filepath, algorithm="sha1", block_size=2**20):
         """Calculate digest of the file located at @filepath

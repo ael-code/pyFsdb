@@ -114,6 +114,14 @@ class FsdbTestFunction(unittest.TestCase):
     def test_len_empty(self):
         self.assertEqual(len(self.fsdb), 0)
 
+    def test_contains(self):
+        digest = self.fsdb.add(self.createTestFile())
+        self.assertIn(digest, self.fsdb)
+
+    def test_contains_empty(self):
+        digest = self.fsdb.add(self.createTestFile())
+        self.assertIn(digest, self.fsdb)
+
 class FsdbTestConfig(unittest.TestCase):
 
     def setUp(self):
