@@ -5,8 +5,11 @@
 
 Fsdb documentation
 ===================
-Fsdb is a one class solution to expose a simple api (add,get,remove) to menage the saving of files on disk.  
-Files are placed under specified fsdb root folder and are managed using a directory tree generated from the file digest.
+Fsdb is the right library for every one that doesn't want to store big files on his database.
+
+Fsdb will works alongside your favorite database, it will help you to easily store and manage files while your database will handle metadata managment.
+
+Fsdb is designed to work with a huge number of big files, it will use your filesystem in a smart way.
 
 Quick start
 -----------
@@ -27,17 +30,54 @@ Usage
     myFsdb = Fsdb("/tmp/fsdbRoot")
 
     #add file
-    fileDigest = myFsdb.add("/path/to/an/existing/file")
+    file_digest = myFsdb.add("/path/to/an/existing/file")
 
     #control if file exists
-    myFsdb.exists(fileDigest)
+    if file_digest in myFsdb:
+        # file exists
+
+    #get file object
+    myFsdb[file_digest]
 
     #get file path
-    myFsdb.get_file_path(fileDigest)
+    myFsdb.get_file_path(digest)
+
+    #check file integrity
+    myFsdb.check(file_digest)
 
     #remove file
-    myFsdb.remove(fileDigest)
+    myFsdb.remove(file_digest)
 
+Configuration
+-------------
+
+There are two ways to configure fsbd:
+ - passing arguments to class constructor :py:func:`Fsdb.__init__()`
+ - editing the json config file
+ 
+The config file must be in the fsdb root folder with name ```.fsdb.conf``` and must be written in a valid json syntax
+
+=============  ========  ==============  ===================================================
+config name    type      default value   description 
+=============  ========  ==============  ===================================================
+mode           string    "0770"          permissions mask to use in file/folder creation
+deep           int       3               number of levels to use for directory tree
+hash_alg       string    "sha1"          name of the hash algorithm to use for file digest
+=============  ========  ==============  ===================================================
+
+Path example
+------------
+.. important::
+   you shouldn't make any assumption about fsdb paths structure.
+   The following explanation is for illustrative purpose only.
+
+If you add a file with the following sha1sum to an fsdb instance with a configured deep level of 3
+
+    ``7bf770901365d4b12ce46a2d545407daf224e583``
+
+The file will be placed in
+
+    ``/path_To_Fsdb_Root/7b/f770/901365d4/b12ce46a2d545407daf224e583``
 
 Contents
 --------
