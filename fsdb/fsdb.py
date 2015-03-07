@@ -126,7 +126,7 @@ class Fsdb(object):
         if not os.path.isfile(filePath):
             raise Exception("fsdb can not add: not regular file received")
 
-        digest = Fsdb.file_digest(filePath, algorithm=self._conf['hash_alg'])
+        digest = self._calc_digest(filePath)
 
         if self.exists(digest):
             self.logger.debug('Added File: ['+digest+'] ( Already exists. Skipping transfer)')
@@ -195,7 +195,11 @@ class Fsdb(object):
           Returns:
             True if the file is not corrupted
         """
-        return self._calc_digest(self.get_file_path(digest)) == digest
+        path = self.get_file_path(digest)
+        if self._calc_digest(path) != digest:
+            self.logger.warning("found corrupted file: '{}'".format(path))
+            return False
+        return True
 
     def corrupted(self):
         """Iterate over digests of all corrupted stored files"""
