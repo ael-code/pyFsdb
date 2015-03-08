@@ -13,25 +13,27 @@ import config
 
 class Fsdb(object):
     """File system database
-       expose a simple api (add,get,remove)
-       to menage the saving of files on disk.
-       files are placed under specified fsdb root folder and
-       are managed using a directory tree generated from the file  digest
+    expose a simple api (add,get,remove)
+    to menage the saving of files on disk.
+    files are placed under specified fsdb root folder and
+    are managed using a directory tree generated from the file  digest
     """
 
     CONFIG_FILE = ".fsdb.conf"
 
     def __init__(self, fsdbRoot, mode=None, deep=None, hash_alg=None):
         """Create an fsdb instance.
-           If file named ".fsdb.conf" it is found in @fsdbRoot,
-           the file will be parsed, config options will be loded and
-           function parameters will be ignored.
-           If there is not such file, function parameters will be loaded and
-           written to ".fsdb.conf" in @fsdbRoot
-         Args:
+
+        If file named ".fsdb.conf" it is found in @fsdbRoot,
+        the file will be parsed, config options will be loded and
+        function parameters will be ignored.
+        If there is not such file, function parameters will be loaded and
+        written to ".fsdb.conf" in @fsdbRoot
+
+        Args:
             fsdbRoot -- root path under will be placed all files
-            mode  -- string reppresenting the mask (octal)
-                     to use for files/folders creation (default: "0770")
+            mode  -- string reppresenting the mask (octal) \
+              to use for files/folders creation (default: "0770")
             deep  -- number of levels to use for directory tree (default: 3)
             hash_alg -- string name of the hash algorithm to use (default: "sha1")
         """
@@ -95,7 +97,7 @@ class Fsdb(object):
 
     def _makedirs(self, path):
         """Make folders recursively for the given path and
-            check read and write permission on the path
+           check read and write permission on the path
           Args:
             path -- path to the leaf folder
         """
@@ -214,9 +216,9 @@ class Fsdb(object):
         will search the underlying filesystem for all the file at the expected depth.
         """
         for dirpath, dirnames, filenames in os.walk(self.fsdbRoot):
-            rel_dirpath = os.path.relpath(dirpath,self.fsdbRoot)
+            rel_dirpath = os.path.relpath(dirpath, self.fsdbRoot)
             # rel_dirpath does not have os.sep neither on front nor at the end. Ex uno/due/tre
-            if (string.count(rel_dirpath, os.sep) + 1 ) != self._conf['deep']:
+            if (string.count(rel_dirpath, os.sep) + 1) != self._conf['deep']:
                 continue
             for f in filenames:
                 yield string.replace(rel_dirpath+f, os.sep, "")
@@ -229,7 +231,7 @@ class Fsdb(object):
                "}"
 
     def __len__(self):
-        """ return the number of stored files"""
+        """Return the number of stored files"""
         count = 0
         for _ in self:
             count += 1
@@ -237,6 +239,18 @@ class Fsdb(object):
 
     def __contains__(self, digest):
         return self.exists(digest)
+
+    def __getitem__(self, digest):
+        """Return an readable only file object of the stored file with the given digest
+
+           Could raise ``IOError`` acoording to the standard ``open()`` function.
+           If you need to write on file or implement some more complicated logic refer to :py:func:`get_file_path()`
+        """
+        if not isinstance(digest, basestring):
+            raise TypeError("key must be instance of basestring")
+        if not self.exists(digest):
+            raise KeyError("no stored file found for '{}'".format(digest))
+        return open(self.get_file_path(digest), 'rb')
 
     @staticmethod
     def file_digest(filepath, algorithm="sha1", block_size=2**20):

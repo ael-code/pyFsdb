@@ -122,6 +122,25 @@ class FsdbTestFunction(unittest.TestCase):
         digest = self.fsdb.add(self.createTestFile())
         self.assertIn(digest, self.fsdb)
 
+    def test_get_item(self):
+        fpath = self.createTestFile()
+        digest = self.fsdb.add(fpath)
+        with open(fpath,'rb') as f1, self.fsdb[digest] as f2:
+            self.assertEqual(f1.read(), f2.read())
+
+    def test_get_item_type_error(self):
+        with self.assertRaises(TypeError):
+            self.fsdb[3]
+        with self.assertRaises(TypeError):
+            self.fsdb[list()]
+
+    def test_get_item_key_error(self):
+        fpath = self.createTestFile()
+        digest = self.fsdb._calc_digest(fpath)
+        with self.assertRaises(KeyError):
+            self.fsdb[digest]
+
+
 class FsdbTestConfig(unittest.TestCase):
 
     def setUp(self):
