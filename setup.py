@@ -1,4 +1,9 @@
 from setuptools import setup, find_packages
+import os
+
+def read(fname):
+    with open(os.path.join(os.path.dirname(__file__), fname)) as buf:
+        return buf.read()
 
 setup(
     name = "Fsdb",
@@ -7,6 +12,7 @@ setup(
 
     author = "Ael",
     author_email = "tommy.ael@gmail.com",
+    long_description=read('README.rst'),
     description = ("File system database. Easily manage file storing"),
     keywords = "database file storing db",
     url = "https://github.com/ael-code/pyFsdb",
