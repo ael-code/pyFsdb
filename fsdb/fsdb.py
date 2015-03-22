@@ -260,7 +260,10 @@ class Fsdb(object):
         """Calculate digest of the file located at @filepath
 
          Args:
-            digest -- digest of the file to remove
+            filepath -- the filepath of the file from which calculate digest
+            algorithn -- the algorithm to use
+                [md5,sha1,sha224,sha256,sha384,sha512]
+            block_size -- the size of the block to read at each iteration
         """
         if(algorithm == "md5"):
             algFunct = hashlib.md5
@@ -278,9 +281,12 @@ class Fsdb(object):
             raise ValueError('"' + algorithm + '" it is not a supported algorithm function')
 
         hashM = algFunct()
-        with open(filepath, 'r') as f:
-            data = f.read(block_size)
-            hashM.update(data)
+        with open(filepath, 'rb') as f:
+            while True:
+                chunk = f.read(block_size)
+                if not chunk:
+                    break
+                hashM.update(chunk)
         return hashM.hexdigest()
 
     @staticmethod
