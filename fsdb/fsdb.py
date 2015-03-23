@@ -81,10 +81,8 @@ class Fsdb(object):
             self._makedirs(fsdbRoot)
 
             # write config file
+            self._create_empty_file(configPath)
             config.writeConf(configPath, conf)
-            oldmask = os.umask(0)
-            os.chmod(configPath, self._conf['mode'])
-            os.umask(oldmask)
 
         # fsdbRoot it is an existing regular folder and we have read and write permission
         self.fsdbRoot = fsdbRoot
@@ -94,6 +92,12 @@ class Fsdb(object):
     def _calc_digest(self, path):
         """calculate digest of the file at the given path"""
         return Fsdb.file_digest(path, algorithm=self._conf['hash_alg'])
+
+    def _create_empty_file(self, path):
+        oldmask = os.umask(0)
+        fd = os.open(path,os.O_CREAT|os.O_WRONLY,self._conf['mode'])
+        os.close(fd)
+        os.umask(oldmask)
 
     def _makedirs(self, path):
         """Make folders recursively for the given path and
@@ -139,12 +143,8 @@ class Fsdb(object):
 
         # make all parent directories if they do not exist
         self._makedirs(absFolderPath)
-
-        # copy file and set permission
-        oldmask = os.umask(0)
+        self._create_empty_file(absPath)
         shutil.copyfile(filePath, absPath)
-        os.chmod(absPath, self._conf['mode'])
-        os.umask(oldmask)
 
         self.logger.debug('Added file: "'+filePath+'" -> "'+absPath+'" [ '+digest+' ]')
 
