@@ -57,13 +57,21 @@ There are two ways to configure fsbd:
  
 The config file must be in the fsdb root folder with name ```.fsdb.conf``` and must be written in a valid json syntax
 
-=============  ========  ==============  ===================================================
-config name    type      default value   description 
-=============  ========  ==============  ===================================================
-mode           string    "0770"          permissions mask to use in file/folder creation
-deep           int       3               number of levels to use for directory tree
-hash_alg       string    "sha1"          name of the hash algorithm to use for file digest
-=============  ========  ==============  ===================================================
+=============  ========  =================  ===================================================
+config name    type      default value      description
+=============  ========  =================  ===================================================
+deep           int       3                  number of levels to use for directory tree
+hash_alg       string    "sha1"             name of the hash algorithm to use for file digest
+fmode          string    "0660"             permissions mask to use in files creation
+dmode          string    see :ref:`dmode`   permissions mask to use in folders creation
+=============  ========  =================  ===================================================
+
+.. _dmode:
+
+dmode
+^^^^^
+If dmode is not provided, the default value will be used. The default value for dmode will be calculated from the fmode,
+It will inherit all permissions from fmode and for every role that has read permission will be setted also the execute permission.
 
 Path example
 ------------

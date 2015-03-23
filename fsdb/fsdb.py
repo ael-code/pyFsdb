@@ -21,7 +21,7 @@ class Fsdb(object):
 
     CONFIG_FILE = ".fsdb.conf"
 
-    def __init__(self, fsdbRoot, mode=None, deep=None, hash_alg=None):
+    def __init__(self, fsdbRoot, deep=None, hash_alg=None, fmode=None, dmode=None):
         """Create an fsdb instance.
 
         If file named ".fsdb.conf" it is found in @fsdbRoot,
@@ -32,10 +32,12 @@ class Fsdb(object):
 
         Args:
             fsdbRoot -- root path under will be placed all files
-            mode  -- string reppresenting the mask (octal) \
-              to use for files/folders creation (default: "0770")
             deep  -- number of levels to use for directory tree (default: 3)
             hash_alg -- string name of the hash algorithm to use (default: "sha1")
+            fmode  -- string reppresenting the mask (octal) \
+              to use for files creation (default: "0660")
+            dmode  -- string reppresenting the mask (octal) \
+              to use for folders creation (default depends on fmode)
         """
 
         self.logger = logging.getLogger(__name__)
@@ -66,12 +68,14 @@ class Fsdb(object):
         else:
             conf = dict()
 
-            if mode is not None:
-                conf['mode'] = mode
             if deep is not None:
                 conf['deep'] = deep
             if hash_alg is not None:
                 conf['hash_alg'] = hash_alg
+            if fmode is not None:
+                conf['fmode'] = fmode
+            if dmode is not None:
+                conf['dmode'] = dmode
 
             conf = config.normalizeConf(conf)
 
@@ -95,7 +99,7 @@ class Fsdb(object):
 
     def _create_empty_file(self, path):
         oldmask = os.umask(0)
-        fd = os.open(path,os.O_CREAT|os.O_WRONLY,self._conf['mode'])
+        fd = os.open(path,os.O_CREAT|os.O_WRONLY,self._conf['fmode'])
         os.close(fd)
         os.umask(oldmask)
 
@@ -107,7 +111,7 @@ class Fsdb(object):
         """
         try:
             oldmask = os.umask(0)
-            os.makedirs(path, self._conf['mode'])
+            os.makedirs(path, self._conf['dmode'])
             os.umask(oldmask)
         except OSError, e:
             if(e.errno == errno.EACCES):
@@ -228,9 +232,10 @@ class Fsdb(object):
 
     def __str__(self):
         return "{root: " + self.fsdbRoot + \
-               ", mode: " + str(oct(self._conf['mode'])) + \
                ", deep: " + str(self._conf['deep']) + \
                ", hash_alg: " + self._conf['hash_alg'] + \
+               ", fmode: " + str(oct(self._conf['fmode'])) + \
+               ", dmode: " + str(oct(self._conf['dmode'])) + \
                "}"
 
     def __len__(self):
@@ -259,10 +264,9 @@ class Fsdb(object):
     def file_digest(filepath, algorithm="sha1", block_size=2**20):
         """Calculate digest of the file located at @filepath
 
-         Args:
+        Args:
             filepath -- the filepath of the file from which calculate digest
-            algorithn -- the algorithm to use
-                [md5,sha1,sha224,sha256,sha384,sha512]
+            algorithn -- the algorithm to use [md5,sha1,sha224,sha256,sha384,sha512]
             block_size -- the size of the block to read at each iteration
         """
         if(algorithm == "md5"):

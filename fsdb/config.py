@@ -1,12 +1,13 @@
 import json
+from utils import calc_dir_mode
 
-CONFIG_SECTION = "fsdb"
-DEFAULT_MODE = "0770"
-DEFAULT_DEEP = 3
+
 ACCEPTED_HASH_ALG = ['md5', 'sha', 'sha1', 'sha224', 'sha2', 'sha256', 'sha384', 'sha512']
-DEFAULT_HASH_ALG = 'sha1'
-
 TAG = "fsdb_config"
+
+DEFAULT_FMODE = "0660"
+DEFAULT_DEEP = 3
+DEFAULT_HASH_ALG = 'sha1'
 
 
 def normalizeConf(oldConf):
@@ -16,12 +17,19 @@ def normalizeConf(oldConf):
 
     conf = oldConf.copy()
 
-    if 'mode' not in conf:
-        conf['mode'] = DEFAULT_MODE
-    elif not isinstance(conf['mode'], basestring):
-        raise TypeError(TAG+": `mode` must be a string")
+    if 'fmode' not in conf:
+        conf['fmode'] = int(DEFAULT_FMODE, 8)
+    elif not isinstance(conf['fmode'], basestring):
+        raise TypeError(TAG+": `fmode` must be a string")
+    else:
+        conf['fmode'] = int(conf['fmode'], 8)
 
-    conf['mode'] = int(conf['mode'], 8)
+    if 'dmode' not in conf:
+        conf['dmode'] = calc_dir_mode(conf['fmode'])
+    elif not isinstance(conf['dmode'], basestring):
+        raise TypeError(TAG+": `dmode` must be a string")
+    else:
+        conf['dmode'] = int(conf['dmode'], 8)
 
     if 'deep' not in conf:
         conf['deep'] = DEFAULT_DEEP
@@ -41,7 +49,7 @@ def normalizeConf(oldConf):
 
 
 def loadConf(configPath):
-    with open(configPath, 'r') as configFile:
+    with open(configPath, 'rb') as configFile:
         conf = json.load(configFile)
 
     return normalizeConf(conf)
@@ -53,12 +61,11 @@ def writeConf(configPath, conf):
 
     mConf = conf.copy()
 
-    if 'mode' in mConf:
-        mConf['mode'] = str(oct(mConf['mode']))
+    if 'fmode' in mConf:
+        mConf['fmode'] = str(oct(mConf['fmode']))
+
+    if 'dmode' in mConf:
+        mConf['dmode'] = str(oct(mConf['dmode']))
 
     with open(configPath, 'w') as outfile:
         json.dump(mConf, outfile, indent=4)
-
-
-def getDefaultConf():
-    return {'mode': DEFAULT_MODE, 'deep': DEFAULT_DEEP, 'hash_alg': DEFAULT_HASH_ALG}
