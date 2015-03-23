@@ -7,7 +7,7 @@ def read(fname):
 
 setup(
     name = "Fsdb",
-    version = "0.2.5",
+    version = "0.3",
     packages=['fsdb'],
 
     author = "Ael",
