@@ -7,6 +7,7 @@ import random
 import shutil
 import filecmp
 import string
+import stat
 import tempfile
 from fsdb import Fsdb
 
@@ -140,23 +141,25 @@ class FsdbTestFunction(unittest.TestCase):
         with self.assertRaises(KeyError):
             self.fsdb[digest]
 
+    def test_right_permission(self):
+        self.fsdb = Fsdb(os.path.join(self.fsdb_tmp_path, "fsdbRoot_"),
+                         fmode="0600",
+                         dmode="0700",
+                         deep=1)
+        digest = self.fsdb.add(self.createTestFile())
+        path = self.fsdb.get_file_path(digest)
+        self.assertEqual(stat.S_IMODE(os.stat(path).st_mode), self.fsdb._conf['fmode'])
+        self.assertEqual(stat.S_IMODE(os.stat(os.path.dirname(path)).st_mode), self.fsdb._conf['dmode'])
 
-class FsdbTestConfig(unittest.TestCase):
+    def test_not_enough_permission_on_directory(self):
+        with self.assertRaisesRegexp(OSError,"Permission denied"):
+            self.fsdb = Fsdb(os.path.join(self.fsdb_tmp_path, "fsdbRoot_"),
+                             dmode="0600")
 
-    def setUp(self):
-        self.fsdb_tmp_path = tempfile.mkdtemp(prefix="fsdb_test")
-
-    def tearDown(self):
-        shutil.rmtree(self.fsdb_tmp_path)
-
-    def test_creation_without_params(self):
-        fsdb = Fsdb(self.fsdb_tmp_path)
-
-    def test_creation_with_params(self):
-        fsdb = Fsdb(self.fsdb_tmp_path,
-                    mode="0770",
-                    deep=5,
-                    hash_alg="sha1")
+    def test_not_enough_permission_on_file(self):
+        with self.assertRaisesRegexp(OSError,"Permission denied"):
+            self.fsdb = Fsdb(os.path.join(self.fsdb_tmp_path, "fsdbRoot_"),
+                             fmode="0400")
 
 
 def randomID(length):
