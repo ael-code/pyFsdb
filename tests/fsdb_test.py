@@ -31,6 +31,10 @@ class FsdbTestFunction(unittest.TestCase):
     def test_add(self):
         self.fsdb.add(self.createTestFile())
 
+    def test_add_readable(self):
+        with open(self.createTestFile(), 'rb') as testFile:
+            self.fsdb.add(testFile)
+            
     def test_file_exists(self):
         testFilePath = self.createTestFile()
         digest = self.fsdb.add(testFilePath)
@@ -45,12 +49,26 @@ class FsdbTestFunction(unittest.TestCase):
         self.assertIsInstance(self.fsdb.get_file_path(digest),basestring)
         self.assertTrue(os.path.isabs(self.fsdb.get_file_path(digest)))
 
-    def test_same_file_after_retrieval(self):
+    def test_same_digest_file_and_readable(self):
+        testFilePath = self.createTestFile()
+        fileDigest = self.fsdb.add(testFilePath)
+        with open(testFilePath, 'rb') as testFile:
+            readableDigest = self.fsdb.add(testFile)
+        self.assertTrue(readableDigest == fileDigest)
+
+    def test_same_file_content_after_retrieval(self):
         testFilePath = self.createTestFile()
         digest = self.fsdb.add(testFilePath)
         storedFilePath = self.fsdb.get_file_path(digest)
         self.assertTrue( filecmp.cmp(testFilePath, storedFilePath, shallow=False) )
-        
+
+    def test_same_readable_content_after_retrieval(self):
+        testFilePath = self.createTestFile()
+        with open(testFilePath, 'rb') as testFile:
+            digest = self.fsdb.add(testFile)
+        storedFilePath = self.fsdb.get_file_path(digest)
+        self.assertTrue( filecmp.cmp(testFilePath, storedFilePath, shallow=False) )
+
     def test_remove_existing_file(self):
         testFilePath = self.createTestFile()
         digest = self.fsdb.add(testFilePath)
@@ -123,9 +141,16 @@ class FsdbTestFunction(unittest.TestCase):
         digest = self.fsdb.add(self.createTestFile())
         self.assertIn(digest, self.fsdb)
 
-    def test_get_item(self):
+    def test_get_item_with_file_insertion(self):
         fpath = self.createTestFile()
         digest = self.fsdb.add(fpath)
+        with open(fpath,'rb') as f1, self.fsdb[digest] as f2:
+            self.assertEqual(f1.read(), f2.read())
+    
+    def test_get_item_with_readable_insertion(self):
+        fpath = self.createTestFile()
+        with open(fpath,'rb') as testFile:
+            digest = self.fsdb.add(testFile)
         with open(fpath,'rb') as f1, self.fsdb[digest] as f2:
             self.assertEqual(f1.read(), f2.read())
 

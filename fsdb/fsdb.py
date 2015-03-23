@@ -19,6 +19,7 @@ class Fsdb(object):
     are managed using a directory tree generated from the file  digest
     """
 
+    BLOCK_SIZE = 2**20
     CONFIG_FILE = ".fsdb.conf"
 
     def __init__(self, fsdbRoot, deep=None, hash_alg=None, fmode=None, dmode=None):
@@ -93,9 +94,37 @@ class Fsdb(object):
 
         self.logger.debug("Fsdb initialized successfully: "+self.__str__())
 
-    def _calc_digest(self, path):
-        """calculate digest of the file at the given path"""
-        return Fsdb.file_digest(path, algorithm=self._conf['hash_alg'])
+    def _calc_digest(self, origin):
+        """calculate digest for the given file or readable/seekable object
+
+         Args:
+            origin -- could be the path of a file or a readable/seekable object ( fileobject, stream, stringIO...)
+         Returns:
+            String rapresenting the digest for the given origin
+        """
+        if hasattr(origin, 'read') and hasattr(origin, 'seek'):
+            pos = origin.tell()
+            digest = Fsdb.file_digest(origin, algorithm=self._conf['hash_alg'])
+            origin.seek(pos)
+        else:
+            with open(origin, 'rb') as f:
+                digest = Fsdb.file_digest(f, algorithm=self._conf['hash_alg'])
+        return digest
+
+    def _copy_content(self, origin, dstPath):
+        """copy the content of origin into dstPath"""
+
+        if hasattr(origin, 'read') and hasattr(origin, 'seek'):
+            pos = origin.tell()
+            with open(dstPath, 'wb') as dst:
+                while True:
+                    chunk = origin.read(Fsdb.BLOCK_SIZE)
+                    if not chunk:
+                        break
+                    dst.write(chunk)
+            origin.seek(pos)
+        else:
+            shutil.copyfile(origin, dstPath)
 
     def _create_empty_file(self, path):
         oldmask = os.umask(0)
@@ -125,18 +154,16 @@ class Fsdb(object):
             else:
                 raise e
 
-    def add(self, filePath):
-        """Add an existing file to fsdb.
-            File under @filePath will be copied under fsdb directory tree
+    def add(self, origin):
+        """Add new element to fsdb.
+
          Args:
-            filePath -- path of the file to be add
+            origin -- could be the path of a file or a readable/seekable object ( fileobject, stream, stringIO...)
          Returns:
             String rapresenting the digest of the file
         """
-        if not os.path.isfile(filePath):
-            raise Exception("fsdb can not add: not regular file received")
 
-        digest = self._calc_digest(filePath)
+        digest = self._calc_digest(origin)
 
         if self.exists(digest):
             self.logger.debug('Added File: ['+digest+'] ( Already exists. Skipping transfer)')
@@ -148,16 +175,16 @@ class Fsdb(object):
         # make all parent directories if they do not exist
         self._makedirs(absFolderPath)
         self._create_empty_file(absPath)
-        shutil.copyfile(filePath, absPath)
+        self._copy_content(origin, absPath)
 
-        self.logger.debug('Added file: "'+filePath+'" -> "'+absPath+'" [ '+digest+' ]')
+        self.logger.debug('Added file: "'+digest+'" [ '+absPath+' ]')
 
         return digest
 
     def remove(self, digest):
         """Remove an existing file from fsdb.
-            File with the given digest will be removed from fsdb and
-            the directory tree will be cleaned (remove empty folders)
+           File with the given digest will be removed from fsdb and
+           the directory tree will be cleaned (remove empty folders)
          Args:
             digest -- digest of the file to remove
         """
@@ -251,6 +278,8 @@ class Fsdb(object):
     def __getitem__(self, digest):
         """Return an readable only file object of the stored file with the given digest
 
+           Client should care about closing the file object after finished with it.
+
            Could raise ``IOError`` acoording to the standard ``open()`` function.
            If you need to write on file or implement some more complicated logic refer to :py:func:`get_file_path()`
         """
@@ -261,11 +290,11 @@ class Fsdb(object):
         return open(self.get_file_path(digest), 'rb')
 
     @staticmethod
-    def file_digest(filepath, algorithm="sha1", block_size=2**20):
-        """Calculate digest of the file located at @filepath
+    def file_digest(origin, algorithm="sha1", block_size=None):
+        """Calculate digest of a readable object
 
-        Args:
-            filepath -- the filepath of the file from which calculate digest
+         Args:
+            origin -- a readable object for which calculate digest
             algorithn -- the algorithm to use [md5,sha1,sha224,sha256,sha384,sha512]
             block_size -- the size of the block to read at each iteration
         """
@@ -284,13 +313,15 @@ class Fsdb(object):
         else:
             raise ValueError('"' + algorithm + '" it is not a supported algorithm function')
 
+        if not block_size:
+            block_size = Fsdb.BLOCK_SIZE
+
         hashM = algFunct()
-        with open(filepath, 'rb') as f:
-            while True:
-                chunk = f.read(block_size)
-                if not chunk:
-                    break
-                hashM.update(chunk)
+        while True:
+            chunk = origin.read(block_size)
+            if not chunk:
+                break
+            hashM.update(chunk)
         return hashM.hexdigest()
 
     @staticmethod
