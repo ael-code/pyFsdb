@@ -22,10 +22,11 @@ def calc_digest(origin, algorithm="sha1", block_size=None):
         algorithn -- the algorithm to use. See ``hashlib.algorithms_available`` for supported algorithms.
         block_size -- the size of the block to read at each iteration
     """
-    if algorithm not in hashlib.algorithms_available:
+    try:
+        hashM = hashlib.new(algorithm)
+    except ValueError:
         raise ValueError('hash algorithm not supported by the underlying platform: "{}"'.format(algorithm))
 
-    hashM = hashlib.new(algorithm)
     while True:
         chunk = origin.read(block_size) if block_size else origin.read()
         if not chunk:
