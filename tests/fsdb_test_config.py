@@ -2,6 +2,9 @@ import unittest
 import tempfile
 import shutil
 from fsdb import Fsdb
+import fsdb.config
+import os
+from StringIO import StringIO
 
 class FsdbTestConfig(unittest.TestCase):
 
@@ -19,11 +22,11 @@ class FsdbTestConfig(unittest.TestCase):
                     fmode="0600",
                     dmode="0700",
                     deep=10,
-                    hash_alg="sha2")
+                    hash_alg="sha512")
         self.assertEqual(fsdb._conf['fmode'], int("0600",8))
         self.assertEqual(fsdb._conf['dmode'], int("0700",8))
         self.assertEqual(fsdb._conf['deep'], 10)
-        self.assertEqual(fsdb._conf['hash_alg'], "sha2")
+        self.assertEqual(fsdb._conf['hash_alg'], "sha512")
 
     def test_negative_depth(self):
         fsdb = Fsdb(self.fsdb_tmp_path,
@@ -46,3 +49,15 @@ class FsdbTestConfig(unittest.TestCase):
         Fsdb(self.fsdb_tmp_path, fmode=fmode)
         fsdb = Fsdb(self.fsdb_tmp_path,fmode="0000")
         self.assertEqual(fsdb._conf['fmode'], int(fmode,8))
+
+    def test_all_algorithm(self):
+        testStr = "quellochetepare"
+        for alg in fsdb.config.ACCEPTED_HASH_ALG:
+            mFsdb = Fsdb(os.path.join(self.fsdb_tmp_path, "test_alg") , hash_alg=alg, deep=0)
+            digest = mFsdb.add(StringIO(testStr))
+            with mFsdb[digest] as f:            
+                self.assertEqual(f.read(),testStr)
+    
+    def test_wrong_algorithm(self):
+        with self.assertRaises(ValueError):
+            Fsdb(self.fsdb_tmp_path, hash_alg="verystrangealgorithm")

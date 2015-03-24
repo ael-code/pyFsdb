@@ -186,7 +186,6 @@ class FsdbTestFunction(unittest.TestCase):
             self.fsdb = Fsdb(os.path.join(self.fsdb_tmp_path, "fsdbRoot_"),
                              fmode="0400")
 
-
 def randomID(length):
         return ''.join(random.choice(string.hexdigits) for _ in range(length))
 
