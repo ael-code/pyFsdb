@@ -2,7 +2,7 @@ import json
 from utils import calc_dir_mode
 
 
-ACCEPTED_HASH_ALG = ['md5', 'sha', 'sha1', 'sha224', 'sha2', 'sha256', 'sha384', 'sha512']
+ACCEPTED_HASH_ALG = ['md5', 'sha1', 'sha224', 'sha256', 'sha384', 'sha512']
 TAG = "fsdb_config"
 
 DEFAULT_FMODE = "0660"
