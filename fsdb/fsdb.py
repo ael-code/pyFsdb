@@ -4,11 +4,11 @@ import os
 import errno
 import stat
 import unicodedata
-import hashlib
 import shutil
 import logging
 import string
 import config
+import hashtools
 
 
 class Fsdb(object):
@@ -104,11 +104,10 @@ class Fsdb(object):
         """
         if hasattr(origin, 'read') and hasattr(origin, 'seek'):
             pos = origin.tell()
-            digest = Fsdb.file_digest(origin, algorithm=self._conf['hash_alg'])
+            digest = hashtools.calc_digest(origin, algorithm=self._conf['hash_alg'])
             origin.seek(pos)
         else:
-            with open(origin, 'rb') as f:
-                digest = Fsdb.file_digest(f, algorithm=self._conf['hash_alg'])
+            digest = hashtools.calc_file_digest(origin, algorithm=self._conf['hash_alg'])
         return digest
 
     def _copy_content(self, origin, dstPath):
@@ -128,7 +127,7 @@ class Fsdb(object):
 
     def _create_empty_file(self, path):
         oldmask = os.umask(0)
-        fd = os.open(path,os.O_CREAT|os.O_WRONLY,self._conf['fmode'])
+        fd = os.open(path, os.O_CREAT | os.O_WRONLY, self._conf['fmode'])
         os.close(fd)
         os.umask(oldmask)
 
@@ -288,41 +287,6 @@ class Fsdb(object):
         if not self.exists(digest):
             raise KeyError("no stored file found for '{}'".format(digest))
         return open(self.get_file_path(digest), 'rb')
-
-    @staticmethod
-    def file_digest(origin, algorithm="sha1", block_size=None):
-        """Calculate digest of a readable object
-
-         Args:
-            origin -- a readable object for which calculate digest
-            algorithn -- the algorithm to use [md5,sha1,sha224,sha256,sha384,sha512]
-            block_size -- the size of the block to read at each iteration
-        """
-        if(algorithm == "md5"):
-            algFunct = hashlib.md5
-        elif(algorithm == "sha1" or algorithm == "sha"):
-            algFunct = hashlib.sha1
-        elif(algorithm == "sha224"):
-            algFunct = hashlib.sha224
-        elif(algorithm == "sha256"):
-            algFunct = hashlib.sha256
-        elif(algorithm == "sha384"):
-            algFunct = hashlib.sha384
-        elif(algorithm == "sha512" or algorithm == "sha2"):
-            algFunct = hashlib.sha512
-        else:
-            raise ValueError('"' + algorithm + '" it is not a supported algorithm function')
-
-        if not block_size:
-            block_size = Fsdb.BLOCK_SIZE
-
-        hashM = algFunct()
-        while True:
-            chunk = origin.read(block_size)
-            if not chunk:
-                break
-            hashM.update(chunk)
-        return hashM.hexdigest()
 
     @staticmethod
     def generate_tree_path(fileDigest, deep):
