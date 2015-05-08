@@ -242,7 +242,7 @@ class Fsdb(object):
             if not self.check(digest):
                 yield digest
 
-    def __iter__(self):
+    def __iter__(self, overPath=False):
         """Iterate over digests of all stored files
 
         Fsdb does not use auxiliary data structure, so this function
@@ -254,7 +254,10 @@ class Fsdb(object):
             if (string.count(rel_dirpath, os.sep) + 1) != self._conf['deep']:
                 continue
             for f in filenames:
-                yield string.replace(rel_dirpath+f, os.sep, "")
+                if overPath:
+                    yield os.path.join(self.fsdbRoot, rel_dirpath, f)
+                else:
+                    yield string.replace(rel_dirpath+f, os.sep, "")
 
     def __str__(self):
         return "{root: " + self.fsdbRoot + \
