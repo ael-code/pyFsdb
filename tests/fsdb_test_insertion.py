@@ -3,25 +3,18 @@ import filecmp
 import stat
 from . import Fsdb
 from . import FsdbTest
-from . import randomID
 
 
-class FsdbTestAdd(FsdbTest):
+class FsdbTestInsertion(FsdbTest):
 
     def test_add(self):
+        '''test insertion through path'''
         self.fsdb.add(self.createTestFile())
 
     def test_add_readable(self):
+        '''test insertion through readable object'''
         with open(self.createTestFile(), 'rb') as testFile:
             self.fsdb.add(testFile)
-
-    def test_file_exists(self):
-        testFilePath = self.createTestFile()
-        digest = self.fsdb.add(testFilePath)
-        self.assertTrue(self.fsdb.exists(digest))
-
-    def test_file_not_exists(self):
-        self.assertFalse(self.fsdb.exists(randomID(20)))
 
     def test_get_file_path(self):
         testFilePath = self.createTestFile()
@@ -30,6 +23,9 @@ class FsdbTestAdd(FsdbTest):
         self.assertTrue(os.path.isabs(self.fsdb.get_file_path(digest)))
 
     def test_same_digest_file_and_readable(self):
+        '''path and readable opbject of the same file
+           should have same id
+        '''
         testFilePath = self.createTestFile()
         fileDigest = self.fsdb.add(testFilePath)
         with open(testFilePath, 'rb') as testFile:
@@ -48,78 +44,6 @@ class FsdbTestAdd(FsdbTest):
             digest = self.fsdb.add(testFile)
         storedFilePath = self.fsdb.get_file_path(digest)
         self.assertTrue(filecmp.cmp(testFilePath, storedFilePath, shallow=False))
-
-    def test_remove_existing_file(self):
-        testFilePath = self.createTestFile()
-        digest = self.fsdb.add(testFilePath)
-        self.fsdb.remove(digest)
-
-    def test_remove_not_existing_file(self):
-        with self.assertRaisesRegexp(OSError, "No such file or directory"):
-            self.fsdb.remove(randomID(20))
-
-    def test_check(self):
-        testFilePath = self.createTestFile()
-        digest = self.fsdb.add(testFilePath)
-        self.assertTrue(self.fsdb.check(digest))
-
-    def test_check_fail(self):
-        testFilePath = self.createTestFile()
-        digest = self.fsdb.add(testFilePath)
-        storedFilePath = self.fsdb.get_file_path(digest)
-        with open(storedFilePath, 'w+') as f:
-            f.write("more is less, less is more")
-        self.assertFalse(self.fsdb.check(digest))
-
-    def test_get_all(self):
-        num = 10
-        digests = list()
-        for d in range(0, num):
-            digests.append(self.fsdb.add(self.createTestFile()))
-        inserted = [i for i in self.fsdb]
-        # check that the two list contain exactly the same elements ( order does not metter )
-        self.assertTrue(len(set(digests).intersection(inserted)) == num)
-
-    def test_get_all_empty(self):
-        inserted = [i for i in self.fsdb]
-        self.assertFalse(inserted)
-
-    def test_corrupted(self):
-        num_corr = 3
-        num_ok = 7
-        corr = list()
-        for _ in range(num_ok):
-            self.fsdb.add(self.createTestFile())
-        for i in range(num_corr):
-            digest = self.fsdb.add(self.createTestFile())
-            corr.append(digest)
-            with open(self.fsdb.get_file_path(digest), "w") as f:
-                f.write("more is less, less is more " + str(i))
-        corrupted = [d for d in self.fsdb.corrupted()]
-        self.assertTrue(len(set(corr).intersection(corrupted)) == num_corr)
-
-    def test_corrupted_empty(self):
-        num = 4
-        for _ in range(num):
-            self.fsdb.add(self.createTestFile())
-        self.assertFalse([d for d in self.fsdb.corrupted()])
-
-    def test_len(self):
-        num = 5
-        for _ in range(num):
-            self.fsdb.add(self.createTestFile())
-        self.assertEqual(len(self.fsdb), num)
-
-    def test_len_empty(self):
-        self.assertEqual(len(self.fsdb), 0)
-
-    def test_contains(self):
-        digest = self.fsdb.add(self.createTestFile())
-        self.assertIn(digest, self.fsdb)
-
-    def test_contains_empty(self):
-        digest = self.fsdb.add(self.createTestFile())
-        self.assertIn(digest, self.fsdb)
 
     def test_get_item_with_file_insertion(self):
         fpath = self.createTestFile()
