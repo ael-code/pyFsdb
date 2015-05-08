@@ -242,6 +242,17 @@ class Fsdb(object):
             if not self.check(digest):
                 yield digest
 
+    def size(self):
+        """Return the total size in bytes of all the files handled by this instance of fsdb.
+
+        Fsdb does not use auxiliary data structure, so this function could be expensive.
+        Look at _iter_over_paths() functions for more details.
+        """
+        tot = 0
+        for p in self.__iter__(overPath=True):
+            tot += os.path.getsize(p)
+        return tot
+
     def __iter__(self, overPath=False):
         """Iterate over digests of all stored files
 

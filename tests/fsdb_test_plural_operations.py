@@ -1,4 +1,5 @@
 from . import FsdbTest
+from os.path import getsize
 
 
 class FsdbTestPluralOperations(FsdbTest):
@@ -44,3 +45,15 @@ class FsdbTestPluralOperations(FsdbTest):
 
     def test_len_empty(self):
         self.assertEqual(len(self.fsdb), 0)
+
+    def test_size_0(self):
+        self.assertEqual(self.fsdb.size(), 0)
+
+    def test_size(self):
+        num = 5
+        tot = 0
+        for _ in range(num):
+            path = self.createTestFile()
+            tot += getsize(path)
+            self.fsdb.add(path)
+        self.assertEqual(self.fsdb.size(), tot)
