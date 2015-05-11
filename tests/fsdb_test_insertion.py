@@ -72,7 +72,7 @@ class FsdbTestInsertion(FsdbTest):
 
     def test_right_permission(self):
         self.fsdb = Fsdb(os.path.join(self.fsdb_tmp_path, "fsdbRoot_"),
-                         fmode="0600",
+                         fmode="0655",
                          dmode="0700",
                          deep=1)
         digest = self.fsdb.add(self.createTestFile())
