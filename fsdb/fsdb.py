@@ -4,11 +4,11 @@ import os
 import errno
 import stat
 import unicodedata
-import shutil
 import logging
 import string
 import config
 import hashtools
+from utils import copy_content
 
 
 class Fsdb(object):
@@ -111,25 +111,28 @@ class Fsdb(object):
         return digest
 
     def _copy_content(self, origin, dstPath):
-        """copy the content of origin into dstPath"""
+        """copy the content of origin into dstPath
 
-        if hasattr(origin, 'read') and hasattr(origin, 'seek'):
-            pos = origin.tell()
-            with open(dstPath, 'wb') as dst:
-                while True:
-                    chunk = origin.read(Fsdb.BLOCK_SIZE)
-                    if not chunk:
-                        break
-                    dst.write(chunk)
-            origin.seek(pos)
+           Due to concurrency problem, the content will be first
+           copied to a temporary file alongside `dstPath` and
+           then atomically moved to `dstPath`
+        """
+
+        if hasattr(origin, 'read'):
+            copy_content(origin, dstPath, self.BLOCK_SIZE, self._conf['fmode'])
+        elif os.path.isfile(origin):
+            with open(origin, 'rb') as f:
+                copy_content(f, dstPath, self.BLOCK_SIZE, self._conf['fmode'])
         else:
-            shutil.copyfile(origin, dstPath)
+            raise ValueError("Could not copy content, `origin` should be a path or a readable object")
 
     def _create_empty_file(self, path):
         oldmask = os.umask(0)
-        fd = os.open(path, os.O_CREAT | os.O_WRONLY, self._conf['fmode'])
-        os.close(fd)
-        os.umask(oldmask)
+        try:
+            fd = os.open(path, os.O_CREAT | os.O_WRONLY, self._conf['fmode'])
+            os.close(fd)
+        finally:
+            os.umask(oldmask)
 
     def _makedirs(self, path):
         """Make folders recursively for the given path and
@@ -173,7 +176,6 @@ class Fsdb(object):
 
         # make all parent directories if they do not exist
         self._makedirs(absFolderPath)
-        self._create_empty_file(absPath)
         self._copy_content(origin, absPath)
 
         self.logger.debug('Added file: "'+digest+'" [ '+absPath+' ]')
