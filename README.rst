@@ -4,11 +4,11 @@ Fsdb
 
 **python file system database**
 
-.. image:: https://pypip.in/license/Fsdb/badge.svg?style=flat
+.. image:: https://img.shields.io/pypi/l/Fsdb.svg
            :target: https://pypi.python.org/pypi/Fsdb/
            :alt: License
 
-.. image:: https://pypip.in/version/Fsdb/badge.svg?style=flat
+.. image:: https://img.shields.io/pypi/v/Fsdb.svg
            :target: https://pypi.python.org/pypi/Fsdb/
            :alt: Version
 
