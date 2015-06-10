@@ -3,3 +3,5 @@ build/*
 dist/*
 Fsdb.egg-info/*
 docs/build/*
+compile_and_upload_signed.sh
+ve/
