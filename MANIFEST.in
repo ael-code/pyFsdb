@@ -1,1 +1,3 @@
 recursive-include tests *.py
+recursive-include docs/source *.rst
+recursive-include docs/source *.py
