@@ -1,0 +1,23 @@
+language: python
+
+python:
+  - "2.6"
+  - "2.7"
+#  - "3.3"
+#  - "3.4"
+#  - "3.5"
+
+env:
+  - TEST_SUITE=nose
+
+matrix:
+    include:
+        - python: 2.7
+          env: TEST_SUITE=flake
+install:
+  - 'if [[ $TEST_SUITE == flake ]] ; then pip install flake8; return $?; fi'
+  - 'if [[ $TEST_SUITE == nose ]] ; then python setup.py install; return $?; fi'
+
+script:
+  - 'if [[ $TEST_SUITE == flake ]] ; then flake8; return $?; fi'
+  - 'if [[ $TEST_SUITE == nose ]] ; then python setup.py test; return $?; fi'
