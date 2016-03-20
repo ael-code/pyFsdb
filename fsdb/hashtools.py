@@ -25,7 +25,7 @@ def calc_digest(origin, algorithm="sha1", block_size=None):
     try:
         hashM = hashlib.new(algorithm)
     except ValueError:
-        raise ValueError('hash algorithm not supported by the underlying platform: "{}"'.format(algorithm))
+        raise ValueError('hash algorithm not supported by the underlying platform: "{0}"'.format(algorithm))
 
     while True:
         chunk = origin.read(block_size) if block_size else origin.read()

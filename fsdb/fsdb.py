@@ -234,7 +234,7 @@ class Fsdb(object):
         """
         path = self.get_file_path(digest)
         if self._calc_digest(path) != digest:
-            self.logger.warning("found corrupted file: '{}'".format(path))
+            self.logger.warning("found corrupted file: '{0}'".format(path))
             return False
         return True
 
@@ -301,7 +301,7 @@ class Fsdb(object):
         if not isinstance(digest, basestring):
             raise TypeError("key must be instance of basestring")
         if not self.exists(digest):
-            raise KeyError("no stored file found for '{}'".format(digest))
+            raise KeyError("no stored file found for '{0}'".format(digest))
         return open(self.get_file_path(digest), 'rb')
 
     @staticmethod
