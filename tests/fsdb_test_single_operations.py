@@ -1,3 +1,4 @@
+import errno
 from . import FsdbTest
 from . import randomID
 
@@ -18,8 +19,11 @@ class FsdbTestSingleOperations(FsdbTest):
         self.fsdb.remove(digest)
 
     def test_remove_not_existing_file(self):
-        with self.assertRaisesRegexp(OSError, "No such file or directory"):
+        try:
             self.fsdb.remove(randomID(20))
+            self.fail('Should raises OSError')
+        except OSError as oe:
+            self.assertEqual(oe.errno, errno.ENOENT)  # No such file or directory
 
     def test_check(self):
         testFilePath = self.createTestFile()
@@ -36,8 +40,8 @@ class FsdbTestSingleOperations(FsdbTest):
 
     def test_contains(self):
         digest = self.fsdb.add(self.createTestFile())
-        self.assertIn(digest, self.fsdb)
+        self.assertTrue(digest in self.fsdb)
 
     def test_contains_empty(self):
         digest = self.fsdb.add(self.createTestFile())
-        self.assertIn(digest, self.fsdb)
+        self.assertTrue(digest in self.fsdb)

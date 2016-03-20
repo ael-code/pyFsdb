@@ -4,6 +4,7 @@ import unittest
 import tempfile
 import shutil
 import os
+from nose.tools import raises
 from StringIO import StringIO
 
 
@@ -60,6 +61,6 @@ class FsdbTestConfig(unittest.TestCase):
             with mFsdb[digest] as f:
                 self.assertEqual(f.read(), testStr)
 
+    @raises(ValueError)
     def test_wrong_algorithm(self):
-        with self.assertRaises(ValueError):
-            Fsdb(self.fsdb_tmp_path, hash_alg="verystrangealgorithm")
+        Fsdb(self.fsdb_tmp_path, hash_alg="verystrangealgorithm")

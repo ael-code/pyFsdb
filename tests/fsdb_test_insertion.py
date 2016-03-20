@@ -1,6 +1,8 @@
 import os
 import filecmp
 import stat
+import errno
+from nose.tools import raises
 from . import Fsdb
 from . import FsdbTest
 
@@ -19,7 +21,7 @@ class FsdbTestInsertion(FsdbTest):
     def test_get_file_path(self):
         testFilePath = self.createTestFile()
         digest = self.fsdb.add(testFilePath)
-        self.assertIsInstance(self.fsdb.get_file_path(digest), basestring)
+        self.assertTrue(isinstance(self.fsdb.get_file_path(digest), basestring))
         self.assertTrue(os.path.isabs(self.fsdb.get_file_path(digest)))
 
     def test_same_digest_file_and_readable(self):
@@ -60,17 +62,19 @@ class FsdbTestInsertion(FsdbTest):
             with self.fsdb[digest] as f2:
                 self.assertEqual(f1.read(), f2.read())
 
-    def test_get_item_type_error(self):
-        with self.assertRaises(TypeError):
-            self.fsdb[3]
-        with self.assertRaises(TypeError):
-            self.fsdb[list()]
+    @raises(TypeError)
+    def test_get_item_type_error_int(self):
+        self.fsdb[3]
 
+    @raises(TypeError)
+    def test_get_item_type_error_list(self):
+        self.fsdb[list()]
+
+    @raises(KeyError)
     def test_get_item_key_error(self):
         fpath = self.createTestFile()
         digest = self.fsdb._calc_digest(fpath)
-        with self.assertRaises(KeyError):
-            self.fsdb[digest]
+        self.fsdb[digest]
 
     def test_right_permission(self):
         self.fsdb = Fsdb(os.path.join(self.fsdb_tmp_path, "fsdbRoot_"),
@@ -83,11 +87,17 @@ class FsdbTestInsertion(FsdbTest):
         self.assertEqual(stat.S_IMODE(os.stat(os.path.dirname(path)).st_mode), self.fsdb._conf['dmode'])
 
     def test_not_enough_permission_on_directory(self):
-        with self.assertRaisesRegexp(OSError, "Permission denied"):
+        try:
             self.fsdb = Fsdb(os.path.join(self.fsdb_tmp_path, "fsdbRoot_"),
                              dmode="0600")
+            self.fail("Expected OSError exception")
+        except OSError as oe:
+            self.assertEqual(oe.errno, errno.EACCES)  # Permission denied
 
     def test_not_enough_permission_on_file(self):
-        with self.assertRaisesRegexp(OSError, "Permission denied"):
+        try:
             self.fsdb = Fsdb(os.path.join(self.fsdb_tmp_path, "fsdbRoot_"),
                              fmode="0400")
+            self.fail("Expected OSError exception")
+        except OSError as oe:
+            self.assertEqual(oe.errno, errno.EACCES)  # Permission denied
