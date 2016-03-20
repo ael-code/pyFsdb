@@ -48,15 +48,17 @@ class FsdbTestInsertion(FsdbTest):
     def test_get_item_with_file_insertion(self):
         fpath = self.createTestFile()
         digest = self.fsdb.add(fpath)
-        with open(fpath, 'rb') as f1, self.fsdb[digest] as f2:
-            self.assertEqual(f1.read(), f2.read())
+        with open(fpath, 'rb') as f1:
+            with self.fsdb[digest] as f2:
+                self.assertEqual(f1.read(), f2.read())
 
     def test_get_item_with_readable_insertion(self):
         fpath = self.createTestFile()
         with open(fpath, 'rb') as testFile:
             digest = self.fsdb.add(testFile)
-        with open(fpath, 'rb') as f1, self.fsdb[digest] as f2:
-            self.assertEqual(f1.read(), f2.read())
+        with open(fpath, 'rb') as f1:
+            with self.fsdb[digest] as f2:
+                self.assertEqual(f1.read(), f2.read())
 
     def test_get_item_type_error(self):
         with self.assertRaises(TypeError):
