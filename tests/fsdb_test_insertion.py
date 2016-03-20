@@ -81,7 +81,7 @@ class FsdbTestInsertion(FsdbTest):
         self.fsdb = Fsdb(os.path.join(self.fsdb_tmp_path, "fsdbRoot_"),
                          fmode="0655",
                          dmode="0700",
-                         deep=1)
+                         depth=1)
         digest = self.fsdb.add(self.createTestFile())
         path = self.fsdb.get_file_path(digest)
         self.assertEqual(stat.S_IMODE(os.stat(path).st_mode), self.fsdb._conf['fmode'])

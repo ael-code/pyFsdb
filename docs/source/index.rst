@@ -7,7 +7,7 @@ Contents
 --------
 .. toctree::
     :maxdepth: 2
-    
+
     doc
     api/index
 

@@ -15,7 +15,7 @@ ACCEPTED_HASH_ALG = ['md5', 'sha1', 'sha224', 'sha256', 'sha384', 'sha512']
 TAG = "fsdb_config"
 
 DEFAULT_FMODE = "0660"
-DEFAULT_DEEP = 3
+DEFAULT_DEPTH = 3
 DEFAULT_HASH_ALG = 'sha1'
 
 
@@ -40,12 +40,12 @@ def normalizeConf(oldConf):
     else:
         conf['dmode'] = int(conf['dmode'], 8)
 
-    if 'deep' not in conf:
-        conf['deep'] = DEFAULT_DEEP
-    elif not isinstance(conf['deep'], int):
-        raise TypeError(TAG + ": `deep` must be an int")
-    elif conf['deep'] < 0:
-        raise ValueError(TAG + ": `deep` must be a positive number")
+    if 'depth' not in conf:
+        conf['depth'] = DEFAULT_DEPTH
+    elif not isinstance(conf['depth'], int):
+        raise TypeError(TAG + ": `depth` must be an int")
+    elif conf['depth'] < 0:
+        raise ValueError(TAG + ": `depth` must be a positive number")
 
     if 'hash_alg' not in conf:
         conf['hash_alg'] = DEFAULT_HASH_ALG

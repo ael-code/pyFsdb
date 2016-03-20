@@ -49,13 +49,13 @@ Configuration
 There are two ways to configure fsbd:
  - passing arguments to class constructor :py:func:`Fsdb.__init__()`
  - editing the json config file
- 
+
 The config file must be in the fsdb root folder with name ```.fsdb.conf``` and must be written in a valid json syntax
 
 =============  ========  =================  ===================================================
 config name    type      default value      description
 =============  ========  =================  ===================================================
-deep           int       3                  number of levels to use for directory tree
+depth           int       3                  number of levels to use for directory tree
 hash_alg       string    "sha1"             name of the hash algorithm to use for file digest
 fmode          string    "0660"             permissions mask to use in files creation
 dmode          string    see :ref:`dmode`   permissions mask to use in folders creation
@@ -74,7 +74,7 @@ Path example
    you shouldn't make any assumption about fsdb paths structure.
    The following explanation is for illustrative purpose only.
 
-If you add a file with the following sha1sum to an fsdb instance with a configured deep level of 3
+If you add a file with the following sha1sum to an fsdb instance with a configured depth level of 3
 
     ``7bf770901365d4b12ce46a2d545407daf224e583``
 

@@ -23,7 +23,7 @@ class Fsdb(object):
     BLOCK_SIZE = 2**20
     CONFIG_FILE = ".fsdb.conf"
 
-    def __init__(self, fsdbRoot, deep=None, hash_alg=None, fmode=None, dmode=None):
+    def __init__(self, fsdbRoot, depth=None, hash_alg=None, fmode=None, dmode=None):
         """Create an fsdb instance.
 
         If file named ".fsdb.conf" it is found in @fsdbRoot,
@@ -34,7 +34,7 @@ class Fsdb(object):
 
         Args:
             fsdbRoot -- root path under will be placed all files
-            deep  -- number of levels to use for directory tree (default: 3)
+            depth  -- number of levels to use for directory tree (default: 3)
             hash_alg -- string name of the hash algorithm to use (default: "sha1")
             fmode  -- string reppresenting the mask (octal) \
               to use for files creation (default: "0660")
@@ -50,7 +50,7 @@ class Fsdb(object):
         fsdbRoot = os.path.normpath(fsdbRoot)      # replace /../ and so on
         fsdbRoot = os.path.realpath(fsdbRoot)      # resolve links
 
-        # check if path it's absolute
+        # check if path is absolute
         if not os.path.isabs(fsdbRoot):
             raise Exception("fsdb can not operate on relative path")
 
@@ -70,8 +70,8 @@ class Fsdb(object):
         else:
             conf = dict()
 
-            if deep is not None:
-                conf['deep'] = deep
+            if depth is not None:
+                conf['depth'] = depth
             if hash_alg is not None:
                 conf['hash_alg'] = hash_alg
             if fmode is not None:
@@ -222,7 +222,7 @@ class Fsdb(object):
           Returns:
             String rapresenting the absolute path of the file
         """
-        relPath = Fsdb.generate_tree_path(digest, self._conf['deep'])
+        relPath = Fsdb.generate_tree_path(digest, self._conf['depth'])
         return os.path.join(self.fsdbRoot, relPath)
 
     def check(self, digest):
@@ -265,7 +265,7 @@ class Fsdb(object):
         for dirpath, dirnames, filenames in os.walk(self.fsdbRoot):
             rel_dirpath = os.path.relpath(dirpath, self.fsdbRoot)
             # rel_dirpath does not have os.sep neither on front nor at the end. Ex uno/due/tre
-            if (rel_dirpath.count(os.sep) + 1) != self._conf['deep']:
+            if (rel_dirpath.count(os.sep) + 1) != self._conf['depth']:
                 continue
             for f in filenames:
                 if overPath:
@@ -275,7 +275,7 @@ class Fsdb(object):
 
     def __str__(self):
         return "{root: " + self.fsdbRoot + \
-               ", deep: " + str(self._conf['deep']) + \
+               ", depth: " + str(self._conf['depth']) + \
                ", hash_alg: " + self._conf['hash_alg'] + \
                ", fmode: " + str(oct(self._conf['fmode'])) + \
                ", dmode: " + str(oct(self._conf['dmode'])) + \
@@ -306,29 +306,29 @@ class Fsdb(object):
         return open(self.get_file_path(digest), 'rb')
 
     @staticmethod
-    def generate_tree_path(fileDigest, deep):
+    def generate_tree_path(fileDigest, depth):
         """Generate a relative path from the given fileDigest
-            relative path has a numbers of directories levels according to @deep
+            relative path has a numbers of directories levels according to @depth
 
          Args:
             fileDigest -- digest for which the relative path will be generate
-            deep -- number of levels to use in relative path generation
+            depth -- number of levels to use in relative path generation
          Returns:
             relative path for the given digest
         """
-        if(deep < 0):
-            raise Exception("deep level can not be negative")
+        if(depth < 0):
+            raise Exception("depth level can not be negative")
         if(os.path.split(fileDigest)[1] != fileDigest):
             raise Exception("fileDigest cannot contain path separator")
 
-        # calculate min length for the given deep (2^1+2^2+...+2^deep+ 1)
-        min = (2**(deep + 1)) - 1
+        # calculate min length for the given depth (2^1+2^2+...+2^depth+ 1)
+        min = (2**(depth + 1)) - 1
         if(len(fileDigest) < min):
-            raise Exception("fileDigest too short for the given deep")
+            raise Exception("fileDigest too short for the given depth")
 
         path = ""
         index = 0
-        for p in range(1, deep + 1):
+        for p in range(1, depth + 1):
             jump = 2**p
             path = os.path.join(path, fileDigest[index:index + jump])
             index += jump

@@ -25,16 +25,16 @@ class FsdbTestConfig(unittest.TestCase):
         fsdb = Fsdb(self.fsdb_tmp_path,
                     fmode="0600",
                     dmode="0700",
-                    deep=10,
+                    depth=10,
                     hash_alg="sha512")
         self.assertEqual(fsdb._conf['fmode'], int("0600", 8))
         self.assertEqual(fsdb._conf['dmode'], int("0700", 8))
-        self.assertEqual(fsdb._conf['deep'], 10)
+        self.assertEqual(fsdb._conf['depth'], 10)
         self.assertEqual(fsdb._conf['hash_alg'], "sha512")
 
     def test_negative_depth(self):
         Fsdb(self.fsdb_tmp_path,
-             deep=5,
+             depth=5,
              hash_alg="sha1")
 
     def test_fmode_passing(self):
@@ -58,7 +58,7 @@ class FsdbTestConfig(unittest.TestCase):
     def test_all_algorithm(self):
         testStr = b'quellochetepare'
         for alg in fsdb.config.ACCEPTED_HASH_ALG:
-            mFsdb = Fsdb(os.path.join(self.fsdb_tmp_path, "test_alg"), hash_alg=alg, deep=0)
+            mFsdb = Fsdb(os.path.join(self.fsdb_tmp_path, "test_alg"), hash_alg=alg, depth=0)
             digest = mFsdb.add(BytesIO(testStr))
             with mFsdb[digest] as f:
                 self.assertEqual(f.read(), testStr)
