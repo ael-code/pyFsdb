@@ -8,12 +8,12 @@ def calc_dir_mode(mode):
     R_OWN = int("0400", 8)
     R_GRP = int("0040", 8)
     R_OTH = int("0004", 8)
-    W_OWN = int("0200", 8)
-    W_GRP = int("0020", 8)
-    W_OTH = int("0002", 8)
     X_OWN = int("0100", 8)
     X_GRP = int("0010", 8)
     X_OTH = int("0001", 8)
+    # W_OWN = int("0200", 8)
+    # W_GRP = int("0020", 8)
+    # W_OTH = int("0002", 8)
 
     if mode & R_OWN:
         mode |= X_OWN
@@ -27,11 +27,11 @@ def calc_dir_mode(mode):
 def copy_content(origin, dstPath, blockSize, mode):
     ''' copy the content of `origin` to `dstPath` in a safe manner.
 
-        this function will first copy the content to a temporary file 
+        this function will first copy the content to a temporary file
         and then move it atomically to the requested destination.
 
-        if some error occurred during content copy or file movement 
-        the temporary file will be deleted        
+        if some error occurred during content copy or file movement
+        the temporary file will be deleted.
     '''
     tmpFD, tmpPath = tempfile.mkstemp(prefix=os.path.basename(dstPath) + "_", suffix='.tmp', dir=os.path.dirname(dstPath))
     try:

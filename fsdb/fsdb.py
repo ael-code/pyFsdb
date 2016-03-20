@@ -61,7 +61,7 @@ class Fsdb(object):
 
         if Fsdb.config_exists(fsdbRoot):
             # warn user about config ignoring and load config from file
-            self.logger.debug("Fsdb config file found. Runtime parameters will be ignored. ["+configPath+"]")
+            self.logger.debug("Fsdb config file found. Runtime parameters will be ignored. [" + configPath + "]")
 
             conf = config.loadConf(configPath)
             self._conf = conf
@@ -92,7 +92,7 @@ class Fsdb(object):
         # fsdbRoot it is an existing regular folder and we have read and write permission
         self.fsdbRoot = fsdbRoot
 
-        self.logger.debug("Fsdb initialized successfully: "+self.__str__())
+        self.logger.debug("Fsdb initialized successfully: " + self.__str__())
 
     def _calc_digest(self, origin):
         """calculate digest for the given file or readable/seekable object
@@ -146,13 +146,13 @@ class Fsdb(object):
             os.umask(oldmask)
         except OSError, e:
             if(e.errno == errno.EACCES):
-                raise Exception("not sufficent permissions to write on fsdb folder: \""+path+'\"')
+                raise Exception('not sufficent permissions to write on fsdb folder: "{0}"'.format(path))
             elif(e.errno == errno.EEXIST):
                 fstat = os.stat(path)
                 if not stat.S_ISDIR(fstat.st_mode):
-                    raise Exception("fsdb folder already exists but it is not a regular folder: \""+path+'\"')
+                    raise Exception('fsdb folder already exists but it is not a regular folder: "{0}"'.format(path))
                 elif not os.access(path, os.R_OK and os.W_OK):
-                    raise Exception("not sufficent permissions to write on fsdb folder: \""+path+'\"')
+                    raise Exception('not sufficent permissions to write on fsdb folder: "{0}"'.format(path))
             else:
                 raise e
 
@@ -168,7 +168,7 @@ class Fsdb(object):
         digest = self._calc_digest(origin)
 
         if self.exists(digest):
-            self.logger.debug('Added File: ['+digest+'] ( Already exists. Skipping transfer)')
+            self.logger.debug('Added File: [{0}] ( Already exists. Skipping transfer)'.format(digest))
             return digest
 
         absPath = self.get_file_path(digest)
@@ -178,7 +178,7 @@ class Fsdb(object):
         self._makedirs(absFolderPath)
         self._copy_content(origin, absPath)
 
-        self.logger.debug('Added file: "'+digest+'" [ '+absPath+' ]')
+        self.logger.debug('Added file: "{0}" [{1}]'.format(digest, absPath))
 
         return digest
 
@@ -197,13 +197,13 @@ class Fsdb(object):
         tmpPath = os.path.dirname(absPath)
         while tmpPath != self.fsdbRoot:
             if os.path.islink(tmpPath):
-                raise Exception('fsdb found a link in db tree: "'+tmpPath+'"')
+                raise Exception('fsdb found a link in db tree: "{0}"'.format(tmpPath))
             if len(os.listdir(tmpPath)) > 0:
                 break
             os.rmdir(tmpPath)
             tmpPath = os.path.dirname(tmpPath)
 
-        self.logger.debug('Removed file: "'+absPath+'" [ '+digest+' ]')
+        self.logger.debug('Removed file: "{0}" [{1}]'.format(absPath, digest))
 
     def exists(self, digest):
         """Check file existence in fsdb
@@ -270,7 +270,7 @@ class Fsdb(object):
                 if overPath:
                     yield os.path.join(self.fsdbRoot, rel_dirpath, f)
                 else:
-                    yield string.replace(rel_dirpath+f, os.sep, "")
+                    yield string.replace(rel_dirpath + f, os.sep, "")
 
     def __str__(self):
         return "{root: " + self.fsdbRoot + \
@@ -321,15 +321,15 @@ class Fsdb(object):
             raise Exception("fileDigest cannot contain path separator")
 
         # calculate min length for the given deep (2^1+2^2+...+2^deep+ 1)
-        min = (2**(deep+1))-1
+        min = (2**(deep + 1)) - 1
         if(len(fileDigest) < min):
             raise Exception("fileDigest too short for the given deep")
 
         path = ""
         index = 0
-        for p in range(1, deep+1):
+        for p in range(1, deep + 1):
             jump = 2**p
-            path = os.path.join(path, fileDigest[index:index+jump])
+            path = os.path.join(path, fileDigest[index:index + jump])
             index += jump
         path = os.path.join(path, fileDigest[index:])
         return path
@@ -341,7 +341,7 @@ class Fsdb(object):
             os.stat(path)
         except OSError, e:
             if(e.errno == errno.EACCES):
-                raise Exception("not sufficent permissions to stat fsdb config file: \""+path+'\"')
+                raise Exception('not sufficent permissions to stat fsdb config file: "{0}"'.format(path))
             elif(e.errno == errno.ENOENT):
                 return False
             else:

@@ -13,37 +13,37 @@ DEFAULT_HASH_ALG = 'sha1'
 def normalizeConf(oldConf):
 
     if not isinstance(oldConf, dict):
-        raise TypeError(TAG+": bad format for config file, not a `dict`")
+        raise TypeError(TAG + ": bad format for config file, not a `dict`")
 
     conf = oldConf.copy()
 
     if 'fmode' not in conf:
         conf['fmode'] = int(DEFAULT_FMODE, 8)
     elif not isinstance(conf['fmode'], basestring):
-        raise TypeError(TAG+": `fmode` must be a string")
+        raise TypeError(TAG + ": `fmode` must be a string")
     else:
         conf['fmode'] = int(conf['fmode'], 8)
 
     if 'dmode' not in conf:
         conf['dmode'] = calc_dir_mode(conf['fmode'])
     elif not isinstance(conf['dmode'], basestring):
-        raise TypeError(TAG+": `dmode` must be a string")
+        raise TypeError(TAG + ": `dmode` must be a string")
     else:
         conf['dmode'] = int(conf['dmode'], 8)
 
     if 'deep' not in conf:
         conf['deep'] = DEFAULT_DEEP
     elif not isinstance(conf['deep'], int):
-        raise TypeError(TAG+": `deep` must be an int")
+        raise TypeError(TAG + ": `deep` must be an int")
     elif conf['deep'] < 0:
-        raise ValueError(TAG+": `deep` must be a positive number")
+        raise ValueError(TAG + ": `deep` must be a positive number")
 
     if 'hash_alg' not in conf:
         conf['hash_alg'] = DEFAULT_HASH_ALG
     elif not isinstance(conf['hash_alg'], basestring):
-        raise TypeError(TAG+": `hash_alg` must be a string")
+        raise TypeError(TAG + ": `hash_alg` must be a string")
     elif conf['hash_alg'] not in ACCEPTED_HASH_ALG:
-        raise ValueError(TAG+": `hash_alg` must be one of "+str(ACCEPTED_HASH_ALG))
+        raise ValueError(TAG + ": `hash_alg` must be one of " + str(ACCEPTED_HASH_ALG))
 
     return conf
 
@@ -57,7 +57,7 @@ def loadConf(configPath):
 
 def writeConf(configPath, conf):
     if not isinstance(conf, dict):
-        raise TypeError(TAG+": bad format for config file, not a `dict`")
+        raise TypeError(TAG + ": bad format for config file, not a `dict`")
 
     mConf = conf.copy()
 

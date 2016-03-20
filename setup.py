@@ -1,22 +1,23 @@
-from setuptools import setup, find_packages
+from setuptools import setup
 import os
+
 
 def read(fname):
     with open(os.path.join(os.path.dirname(__file__), fname)) as buf:
         return buf.read()
 
 setup(
-    name = "Fsdb",
-    version = "0.3.3",
+    name="Fsdb",
+    version="0.3.3",
     packages=['fsdb'],
 
-    author = "Ael",
-    author_email = "tommy.ael@gmail.com",
+    author="Ael",
+    author_email="tommy.ael@gmail.com",
     long_description=read('README.rst'),
-    description = ("File system database. Easily manage file storing"),
-    keywords = "database file storing db",
-    url = "https://github.com/ael-code/pyFsdb",
-    license = "LGPLv3",
+    description=("File system database. Easily manage file storing"),
+    keywords="database file storing db",
+    url="https://github.com/ael-code/pyFsdb",
+    license="LGPLv3",
     tests_require='nose',
     test_suite='nose.collector',
     classifiers=[
@@ -28,4 +29,3 @@ setup(
         "Programming Language :: Python :: 2 :: Only"
     ]
 )
-
