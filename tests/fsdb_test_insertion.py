@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import os
 import filecmp
 import stat
@@ -21,7 +23,6 @@ class FsdbTestInsertion(FsdbTest):
     def test_get_file_path(self):
         testFilePath = self.createTestFile()
         digest = self.fsdb.add(testFilePath)
-        self.assertTrue(isinstance(self.fsdb.get_file_path(digest), basestring))
         self.assertTrue(os.path.isabs(self.fsdb.get_file_path(digest)))
 
     def test_same_digest_file_and_readable(self):

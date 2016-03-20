@@ -1,5 +1,14 @@
+from __future__ import unicode_literals
+
 import json
-from utils import calc_dir_mode
+import sys
+from .utils import calc_dir_mode
+
+
+if sys.version_info[0] == 3:
+    string_types = str
+else:
+    string_types = basestring
 
 
 ACCEPTED_HASH_ALG = ['md5', 'sha1', 'sha224', 'sha256', 'sha384', 'sha512']
@@ -19,14 +28,14 @@ def normalizeConf(oldConf):
 
     if 'fmode' not in conf:
         conf['fmode'] = int(DEFAULT_FMODE, 8)
-    elif not isinstance(conf['fmode'], basestring):
+    elif not isinstance(conf['fmode'], string_types):
         raise TypeError(TAG + ": `fmode` must be a string")
     else:
         conf['fmode'] = int(conf['fmode'], 8)
 
     if 'dmode' not in conf:
         conf['dmode'] = calc_dir_mode(conf['fmode'])
-    elif not isinstance(conf['dmode'], basestring):
+    elif not isinstance(conf['dmode'], string_types):
         raise TypeError(TAG + ": `dmode` must be a string")
     else:
         conf['dmode'] = int(conf['dmode'], 8)
@@ -40,7 +49,7 @@ def normalizeConf(oldConf):
 
     if 'hash_alg' not in conf:
         conf['hash_alg'] = DEFAULT_HASH_ALG
-    elif not isinstance(conf['hash_alg'], basestring):
+    elif not isinstance(conf['hash_alg'], string_types):
         raise TypeError(TAG + ": `hash_alg` must be a string")
     elif conf['hash_alg'] not in ACCEPTED_HASH_ALG:
         raise ValueError(TAG + ": `hash_alg` must be one of " + str(ACCEPTED_HASH_ALG))
@@ -49,7 +58,7 @@ def normalizeConf(oldConf):
 
 
 def loadConf(configPath):
-    with open(configPath, 'rb') as configFile:
+    with open(configPath, 'r') as configFile:
         conf = json.load(configFile)
 
     return normalizeConf(conf)

@@ -54,7 +54,7 @@ def copy_content(origin, dstPath, blockSize, mode):
         # move temporary file to actual requested destination
         try:
             os.rename(tmpPath, dstPath)
-        except OSError, e:
+        except OSError as e:
             # on Windows if dstPath already exists at renaming time, an OSError is raised.
             if platform.system() is 'Windows' and e.errno is errno.EEXIST:
                 pass

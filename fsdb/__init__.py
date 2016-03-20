@@ -1,3 +1,3 @@
-from fsdb import Fsdb
+from .fsdb import Fsdb
 
 __all__ = ['Fsdb']

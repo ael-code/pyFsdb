@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 from fsdb import Fsdb
 import fsdb.config
 import unittest
@@ -5,7 +7,7 @@ import tempfile
 import shutil
 import os
 from nose.tools import raises
-from StringIO import StringIO
+from io import BytesIO
 
 
 class FsdbTestConfig(unittest.TestCase):
@@ -54,10 +56,10 @@ class FsdbTestConfig(unittest.TestCase):
         self.assertEqual(fsdb._conf['fmode'], int(fmode, 8))
 
     def test_all_algorithm(self):
-        testStr = "quellochetepare"
+        testStr = b'quellochetepare'
         for alg in fsdb.config.ACCEPTED_HASH_ALG:
             mFsdb = Fsdb(os.path.join(self.fsdb_tmp_path, "test_alg"), hash_alg=alg, deep=0)
-            digest = mFsdb.add(StringIO(testStr))
+            digest = mFsdb.add(BytesIO(testStr))
             with mFsdb[digest] as f:
                 self.assertEqual(f.read(), testStr)
 
