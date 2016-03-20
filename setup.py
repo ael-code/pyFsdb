@@ -8,7 +8,7 @@ def read(fname):
 
 setup(
     name="Fsdb",
-    version="0.3.3",
+    version="1.0",
     packages=['fsdb'],
 
     author="Ael",
@@ -21,7 +21,7 @@ setup(
     tests_require='nose',
     test_suite='nose.collector',
     classifiers=[
-        "Development Status :: 3 - Alpha",
+        "Development Status :: 5 - Production/Stable",
         "License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)",
         "Topic :: Database",
         "Operating System :: OS Independent",
