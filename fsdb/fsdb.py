@@ -48,11 +48,7 @@ class Fsdb(object):
         fsdbRoot = os.path.expanduser(fsdbRoot)    # replace ~
         fsdbRoot = os.path.expandvars(fsdbRoot)    # replace vars
         fsdbRoot = os.path.normpath(fsdbRoot)      # replace /../ and so on
-        fsdbRoot = os.path.realpath(fsdbRoot)      # resolve links
-
-        # check if path is absolute
-        if not os.path.isabs(fsdbRoot):
-            raise Exception("fsdb can not operate on relative path")
+        fsdbRoot = os.path.abspath(fsdbRoot)       # return absolute path
 
         # on different platforms same unicode string could have different rappresentation
         if sys.version_info[0] == 3 or isinstance(fsdbRoot, unicode):

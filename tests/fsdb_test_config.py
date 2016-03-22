@@ -32,9 +32,24 @@ class FsdbTestConfig(unittest.TestCase):
         self.assertEqual(fsdb._conf['depth'], 10)
         self.assertEqual(fsdb._conf['hash_alg'], "sha512")
 
+    def test_undirect_relative_path(self):
+        '''A relative path containing back reference (/../) should be accepted and sanitized'''
+        relPath = os.path.relpath(self.fsdb_tmp_path)
+        fsdb = Fsdb(relPath)
+        self.assertEqual(fsdb.fsdbRoot, self.fsdb_tmp_path)
+
+    def test_direct_relative_path(self):
+        '''A relative path should be accepted and sanitized'''
+        absdir = os.path.dirname(self.fsdb_tmp_path)
+        os.chdir(absdir)
+        relPath = os.path.relpath(self.fsdb_tmp_path, absdir)
+        fsdb = Fsdb(relPath)
+        self.assertEqual(fsdb.fsdbRoot, self.fsdb_tmp_path)
+
+    @raises(ValueError)
     def test_negative_depth(self):
         Fsdb(self.fsdb_tmp_path,
-             depth=5,
+             depth=-5,
              hash_alg="sha1")
 
     def test_fmode_passing(self):
