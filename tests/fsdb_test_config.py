@@ -87,3 +87,11 @@ class FsdbTestConfig(unittest.TestCase):
         fsdb.config.from_json_format(conf)
         fsdb.config.to_json_format(conf)
         self.assertEqual(conf, fsdb.config.get_defaults())
+
+    def test_deep_retrocompatibility(self):
+        conf = fsdb.config.get_defaults()
+        conf['deep'] = conf.pop('depth') + 1
+        confFile = os.path.join(self.fsdb_tmp_path, Fsdb.CONFIG_FILE)
+        fsdb.config.writeConf(confFile, conf)
+        myFsdb = Fsdb(self.fsdb_tmp_path)
+        self.assertEqual(myFsdb._conf['depth'], fsdb.config.get_defaults()['depth'] + 1)

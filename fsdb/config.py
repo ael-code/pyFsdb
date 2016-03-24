@@ -19,42 +19,25 @@ def get_defaults():
     return __defaults.copy()
 
 
-def normalizeConf(oldConf):
-
-    if not isinstance(oldConf, dict):
-        raise TypeError(TAG + ": bad format for config file, not a `dict`")
-
-    conf = oldConf.copy()
-
-    if 'fmode' not in conf:
-        conf['fmode'] = int(__defaults['fmode'], 8)
-    elif not isinstance(conf['fmode'], string_types):
+def check_config(conf):
+    '''Type and boundary check'''
+    if 'fmode' in conf and not isinstance(conf['fmode'], string_types):
         raise TypeError(TAG + ": `fmode` must be a string")
-    else:
-        conf['fmode'] = int(conf['fmode'], 8)
 
-    if 'dmode' not in conf:
-        conf['dmode'] = calc_dir_mode(conf['fmode'])
-    elif not isinstance(conf['dmode'], string_types):
+    if 'dmode' in conf and not isinstance(conf['dmode'], string_types):
         raise TypeError(TAG + ": `dmode` must be a string")
-    else:
-        conf['dmode'] = int(conf['dmode'], 8)
 
-    if 'depth' not in conf:
-        conf['depth'] = __defaults['depth']
-    elif not isinstance(conf['depth'], int):
-        raise TypeError(TAG + ": `depth` must be an int")
-    elif conf['depth'] < 0:
-        raise ValueError(TAG + ": `depth` must be a positive number")
+    if 'depth' in conf:
+        if not isinstance(conf['depth'], int):
+            raise TypeError(TAG + ": `depth` must be an int")
+        if conf['depth'] < 0:
+            raise ValueError(TAG + ": `depth` must be a positive number")
 
-    if 'hash_alg' not in conf:
-        conf['hash_alg'] = __defaults['hash_alg']
-    elif not isinstance(conf['hash_alg'], string_types):
-        raise TypeError(TAG + ": `hash_alg` must be a string")
-    elif conf['hash_alg'] not in ACCEPTED_HASH_ALG:
-        raise ValueError(TAG + ": `hash_alg` must be one of " + str(ACCEPTED_HASH_ALG))
-
-    return conf
+    if 'hash_alg' in conf:
+        if not isinstance(conf['hash_alg'], string_types):
+            raise TypeError(TAG + ": `hash_alg` must be a string")
+        if conf['hash_alg'] not in ACCEPTED_HASH_ALG:
+            raise ValueError(TAG + ": `hash_alg` must be one of " + str(ACCEPTED_HASH_ALG))
 
 
 def from_json_format(conf):
@@ -73,19 +56,33 @@ def to_json_format(conf):
         conf['dmode'] = oct(conf['dmode'])[-3:]
 
 
+def normalize_conf(uConf):
+    '''Check, convert and adjust user passed config
+
+       Given a user configuration it returns a verified configuration with
+       all parameters converted to the types that are needed at runtime.
+    '''
+    # Previous to version 1.0 the depth parameter was called deep
+    if 'deep' in uConf:
+        uConf['depth'] = uConf.pop('deep')
+
+    # check for type error
+    check_config(uConf)
+    conf = get_defaults()
+    conf.update(uConf)
+    # convert some fileds into python suitable format
+    from_json_format(conf)
+    if 'dmode' not in conf:
+        conf['dmode'] = calc_dir_mode(conf['fmode'])
+    return conf
+
+
 def loadConf(configPath):
     with open(configPath, 'r') as configFile:
-        conf = json.load(configFile)
-
-    return normalizeConf(conf)
+        loaded = json.load(configFile)
+    return loaded
 
 
 def writeConf(configPath, conf):
-    if not isinstance(conf, dict):
-        raise TypeError(TAG + ": bad format for config file, not a `dict`")
-
-    mConf = conf.copy()
-    to_json_format(mConf)
-
     with open(configPath, 'w') as outfile:
-        json.dump(mConf, outfile, indent=4)
+        json.dump(conf, outfile, indent=4)

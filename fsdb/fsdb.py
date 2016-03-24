@@ -62,7 +62,7 @@ class Fsdb(object):
             self.logger.debug("Fsdb config file found. Runtime parameters will be ignored. [" + configPath + "]")
 
             conf = config.loadConf(configPath)
-            self._conf = conf
+            self._conf = config.normalize_conf(conf)
 
         else:
             conf = dict()
@@ -76,9 +76,7 @@ class Fsdb(object):
             if dmode is not None:
                 conf['dmode'] = dmode
 
-            conf = config.normalizeConf(conf)
-
-            self._conf = conf
+            self._conf = config.normalize_conf(conf)
 
             # make all parent directories if they do not exist
             self._makedirs(fsdbRoot)
