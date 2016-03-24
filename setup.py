@@ -1,5 +1,6 @@
 from setuptools import setup
 import os
+from fsdb import __version__
 
 
 def read(fname):
@@ -8,7 +9,7 @@ def read(fname):
 
 setup(
     name="Fsdb",
-    version="1.0",
+    version=__version__,
     packages=['fsdb'],
 
     author="Ael",
