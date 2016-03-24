@@ -38,7 +38,7 @@ class Fsdb(object):
             depth  -- number of levels to use for directory tree (default: 3)
             hash_alg -- string name of the hash algorithm to use (default: "sha1")
             fmode  -- string reppresenting the mask (octal) \
-              to use for files creation (default: "0660")
+              to use for files creation (default: "660")
             dmode  -- string reppresenting the mask (octal) \
               to use for folders creation (default depends on fmode)
         """

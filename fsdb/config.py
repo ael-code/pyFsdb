@@ -9,7 +9,7 @@ ACCEPTED_HASH_ALG = ['md5', 'sha1', 'sha224', 'sha256', 'sha384', 'sha512']
 TAG = "fsdb_config"
 
 __defaults = dict(
-        fmode="0660",
+        fmode="660",
         depth=3,
         hash_alg='sha1',
     )
@@ -57,6 +57,22 @@ def normalizeConf(oldConf):
     return conf
 
 
+def from_json_format(conf):
+    '''Convert fields of parsed json dictionary to python format'''
+    if 'fmode' in conf:
+        conf['fmode'] = int(conf['fmode'], 8)
+    if 'dmode' in conf:
+        conf['dmode'] = int(conf['dmode'], 8)
+
+
+def to_json_format(conf):
+    '''Convert fields of a python dictionary to be dumped in json format'''
+    if 'fmode' in conf:
+        conf['fmode'] = oct(conf['fmode'])[-3:]
+    if 'dmode' in conf:
+        conf['dmode'] = oct(conf['dmode'])[-3:]
+
+
 def loadConf(configPath):
     with open(configPath, 'r') as configFile:
         conf = json.load(configFile)
@@ -69,12 +85,7 @@ def writeConf(configPath, conf):
         raise TypeError(TAG + ": bad format for config file, not a `dict`")
 
     mConf = conf.copy()
-
-    if 'fmode' in mConf:
-        mConf['fmode'] = str(oct(mConf['fmode']))
-
-    if 'dmode' in mConf:
-        mConf['dmode'] = str(oct(mConf['dmode']))
+    to_json_format(mConf)
 
     with open(configPath, 'w') as outfile:
         json.dump(mConf, outfile, indent=4)

@@ -23,12 +23,12 @@ class FsdbTestConfig(unittest.TestCase):
 
     def test_creation_with_params(self):
         fsdb = Fsdb(self.fsdb_tmp_path,
-                    fmode="0600",
-                    dmode="0700",
+                    fmode="600",
+                    dmode="700",
                     depth=10,
                     hash_alg="sha512")
-        self.assertEqual(fsdb._conf['fmode'], int("0600", 8))
-        self.assertEqual(fsdb._conf['dmode'], int("0700", 8))
+        self.assertEqual(fsdb._conf['fmode'], int("600", 8))
+        self.assertEqual(fsdb._conf['dmode'], int("700", 8))
         self.assertEqual(fsdb._conf['depth'], 10)
         self.assertEqual(fsdb._conf['hash_alg'], "sha512")
 
@@ -53,21 +53,21 @@ class FsdbTestConfig(unittest.TestCase):
              hash_alg="sha1")
 
     def test_fmode_passing(self):
-        fmode = "0600"
+        fmode = "600"
         fsdb = Fsdb(self.fsdb_tmp_path,
                     fmode=fmode)
         self.assertEqual(fsdb._conf['fmode'], int(fmode, 8))
 
     def test_dmode_passing(self):
-        dmode = "0700"
+        dmode = "700"
         fsdb = Fsdb(self.fsdb_tmp_path,
                     fmode=dmode)
         self.assertEqual(fsdb._conf['dmode'], int(dmode, 8))
 
     def test_fmode_other_session(self):
-        fmode = "0600"
+        fmode = "600"
         Fsdb(self.fsdb_tmp_path, fmode=fmode)
-        fsdb = Fsdb(self.fsdb_tmp_path, fmode="0000")
+        fsdb = Fsdb(self.fsdb_tmp_path, fmode="000")
         self.assertEqual(fsdb._conf['fmode'], int(fmode, 8))
 
     def test_all_algorithm(self):
@@ -81,3 +81,9 @@ class FsdbTestConfig(unittest.TestCase):
     @raises(ValueError)
     def test_wrong_algorithm(self):
         Fsdb(self.fsdb_tmp_path, hash_alg="verystrangealgorithm")
+
+    def test_config_converted(self):
+        conf = fsdb.config.get_defaults()
+        fsdb.config.from_json_format(conf)
+        fsdb.config.to_json_format(conf)
+        self.assertEqual(conf, fsdb.config.get_defaults())

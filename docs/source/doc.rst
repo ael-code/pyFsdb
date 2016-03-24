@@ -57,7 +57,7 @@ config name    type      default value      description
 =============  ========  =================  ===================================================
 depth           int       3                  number of levels to use for directory tree
 hash_alg       string    "sha1"             name of the hash algorithm to use for file digest
-fmode          string    "0660"             permissions mask to use in files creation
+fmode          string    "660"              permissions mask to use in files creation
 dmode          string    see :ref:`dmode`   permissions mask to use in folders creation
 =============  ========  =================  ===================================================
 
