@@ -1,14 +1,8 @@
 from __future__ import unicode_literals
-
 import json
-import sys
+
 from .utils import calc_dir_mode
-
-
-if sys.version_info[0] == 3:
-    string_types = str
-else:
-    string_types = basestring
+from .compat import string_types
 
 
 ACCEPTED_HASH_ALG = ['md5', 'sha1', 'sha224', 'sha256', 'sha384', 'sha512']
