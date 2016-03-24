@@ -12,9 +12,13 @@ Fsdb
            :target: https://pypi.python.org/pypi/Fsdb/
            :alt: Version
 
-.. image:: https://readthedocs.org/projects/pyfsdb/badge/?version=latest 
+.. image:: https://readthedocs.org/projects/pyfsdb/badge/?version=latest
            :target: https://pyfsdb.readthedocs.org/en/latest
            :alt: Documentation Status
+
+.. image:: https://img.shields.io/pypi/pyversions/fsdb.svg
+           :target: https://pypi.python.org/pypi/Fsdb/
+           :alt: Supported python version
 
 
 Fsdb is a python implementation of a `content addressable storage`_, it is designed to work with a huge number of big files and it will use your filesystem in a smart way.
