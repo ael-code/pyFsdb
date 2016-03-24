@@ -10,6 +10,7 @@ import logging
 from . import config
 from . import hashtools
 from .utils import copy_content
+from .compat import string_types
 
 
 class Fsdb(object):
@@ -208,6 +209,8 @@ class Fsdb(object):
           Returns:
             True if file exists under this instance of fsdb, false otherwise
         """
+        if not isinstance(digest, string_types):
+            raise TypeError("digest must be a string")
         return os.path.isfile(self.get_file_path(digest))
 
     def get_file_path(self, digest):
@@ -295,8 +298,6 @@ class Fsdb(object):
            Could raise ``IOError`` acoording to the standard ``open()`` function.
            If you need to write on file or implement some more complicated logic refer to :py:func:`get_file_path()`
         """
-        if not isinstance(digest, str):
-            raise TypeError("key must be a string")
         if not self.exists(digest):
             raise KeyError("no stored file found for '{0}'".format(digest))
         return open(self.get_file_path(digest), 'rb')
