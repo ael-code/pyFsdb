@@ -8,9 +8,15 @@ from .compat import string_types
 ACCEPTED_HASH_ALG = ['md5', 'sha1', 'sha224', 'sha256', 'sha384', 'sha512']
 TAG = "fsdb_config"
 
-DEFAULT_FMODE = "0660"
-DEFAULT_DEPTH = 3
-DEFAULT_HASH_ALG = 'sha1'
+__defaults = dict(
+        fmode="0660",
+        depth=3,
+        hash_alg='sha1',
+    )
+
+
+def get_defaults():
+    return __defaults.copy()
 
 
 def normalizeConf(oldConf):
@@ -21,7 +27,7 @@ def normalizeConf(oldConf):
     conf = oldConf.copy()
 
     if 'fmode' not in conf:
-        conf['fmode'] = int(DEFAULT_FMODE, 8)
+        conf['fmode'] = int(__defaults['fmode'], 8)
     elif not isinstance(conf['fmode'], string_types):
         raise TypeError(TAG + ": `fmode` must be a string")
     else:
@@ -35,14 +41,14 @@ def normalizeConf(oldConf):
         conf['dmode'] = int(conf['dmode'], 8)
 
     if 'depth' not in conf:
-        conf['depth'] = DEFAULT_DEPTH
+        conf['depth'] = __defaults['depth']
     elif not isinstance(conf['depth'], int):
         raise TypeError(TAG + ": `depth` must be an int")
     elif conf['depth'] < 0:
         raise ValueError(TAG + ": `depth` must be a positive number")
 
     if 'hash_alg' not in conf:
-        conf['hash_alg'] = DEFAULT_HASH_ALG
+        conf['hash_alg'] = __defaults['hash_alg']
     elif not isinstance(conf['hash_alg'], string_types):
         raise TypeError(TAG + ": `hash_alg` must be a string")
     elif conf['hash_alg'] not in ACCEPTED_HASH_ALG:
