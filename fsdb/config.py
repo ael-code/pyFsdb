@@ -19,6 +19,12 @@ def get_defaults():
     return __defaults.copy()
 
 
+def update_backword(conf):
+    # Previous to version 1.0 the depth parameter was called deep
+    if 'depth' not in conf and 'deep' in conf:
+        conf['depth'] = conf.pop('deep')
+
+
 def check_config(conf):
     '''Type and boundary check'''
     if 'fmode' in conf and not isinstance(conf['fmode'], string_types):
@@ -56,20 +62,15 @@ def to_json_format(conf):
         conf['dmode'] = oct(conf['dmode'])[-3:]
 
 
-def normalize_conf(uConf):
+def normalize_conf(conf):
     '''Check, convert and adjust user passed config
 
        Given a user configuration it returns a verified configuration with
        all parameters converted to the types that are needed at runtime.
     '''
-    # Previous to version 1.0 the depth parameter was called deep
-    if 'deep' in uConf:
-        uConf['depth'] = uConf.pop('deep')
-
+    conf = conf.copy()
     # check for type error
-    check_config(uConf)
-    conf = get_defaults()
-    conf.update(uConf)
+    check_config(conf)
     # convert some fileds into python suitable format
     from_json_format(conf)
     if 'dmode' not in conf:

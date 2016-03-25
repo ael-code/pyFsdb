@@ -95,3 +95,9 @@ class FsdbTestConfig(unittest.TestCase):
         fsdb.config.writeConf(confFile, conf)
         myFsdb = Fsdb(self.fsdb_tmp_path)
         self.assertEqual(myFsdb._conf['depth'], fsdb.config.get_defaults()['depth'] + 1)
+
+    def test_write_default_config(self):
+        Fsdb(self.fsdb_tmp_path)
+        confFile = os.path.join(self.fsdb_tmp_path, Fsdb.CONFIG_FILE)
+        conf = fsdb.config.loadConf(confFile)
+        self.assertEqual(conf, fsdb.config.get_defaults())

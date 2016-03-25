@@ -57,16 +57,18 @@ class Fsdb(object):
 
         configPath = os.path.join(fsdbRoot, Fsdb.CONFIG_FILE)
 
+        conf = config.get_defaults()
+
         if Fsdb.config_exists(fsdbRoot):
             # warn user about config ignoring and load config from file
             self.logger.debug("Fsdb config file found. Runtime parameters will be ignored. [" + configPath + "]")
 
-            conf = config.loadConf(configPath)
+            oldConf = config.loadConf(configPath)
+            config.update_backword(oldConf)
+            conf.update(oldConf)
             self._conf = config.normalize_conf(conf)
 
         else:
-            conf = dict()
-
             if depth is not None:
                 conf['depth'] = depth
             if hash_alg is not None:
@@ -80,7 +82,6 @@ class Fsdb(object):
 
             # make all parent directories if they do not exist
             self._makedirs(fsdbRoot)
-
             # write config file
             self._create_empty_file(configPath)
             config.writeConf(configPath, conf)
