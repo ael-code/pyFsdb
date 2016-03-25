@@ -35,7 +35,7 @@ Usage
     myFsdb[file_digest]
 
     #get file path
-    myFsdb.get_file_path(digest)
+    myFsdb.get_file_path(file_digest)
 
     #check file integrity
     myFsdb.check(file_digest)
